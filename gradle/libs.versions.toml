@@ -11,7 +11,8 @@ composeBom = "2024.09.00"
 spotless = "7.0.3"
 ksp = "2.0.21-1.0.27"
 hilt = "2.56.2"
-room = "2.7.1"
+room = "2.8.0"
+pdfboxAndroid = "2.0.27.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -33,6 +34,7 @@ hilt-android-compiler = { group = "com.google.dagger", name = "hilt-android-comp
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
+pdfbox-android = { group = "com.tom-roush", name = "pdfbox-android", version.ref = "pdfboxAndroid" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

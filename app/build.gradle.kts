@@ -54,7 +54,19 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
+
     implementation(libs.litert)
+    implementation(libs.litert.support)
+    implementation(libs.litert.gpu)
+    implementation(libs.litert.gpu.api)
+
+    implementation(libs.djl.android.core)
+    implementation(libs.djl.android.pytorch)
+    implementation(libs.djl.android.onnx)
+
+    implementation(libs.djl.huggingface.tokenizer)
+    implementation(libs.djl.android.tokenizer)
+
     ksp(libs.hilt.android.compiler)
     ksp(libs.room.compiler)
     testImplementation(libs.junit)

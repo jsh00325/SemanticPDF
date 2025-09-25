@@ -1,0 +1,81 @@
+package com.pdf.semantic.data.datasource
+
+import ai.djl.huggingface.tokenizers.HuggingFaceTokenizer
+import android.content.Context
+import android.util.Log
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.FileOutputStream
+import javax.inject.Inject
+import javax.inject.Singleton
+
+@Singleton
+class TokenizerDataSource @Inject constructor(
+    @ApplicationContext private val context: Context,
+) {
+    private var tokenizer: HuggingFaceTokenizer? = null
+    private val mutex = Mutex()
+
+    private suspend fun initialize() {
+        mutex.withLock {
+            if (tokenizer != null) return
+
+            withContext(Dispatchers.Default) {
+                val tokenizerFile = prepareTokenizerFile()
+                tokenizer = loadTokenizerFromFile(tokenizerFile)
+            }
+        }
+    }
+
+    private fun prepareTokenizerFile(): File {
+        val cacheFile = File(context.cacheDir, TOKENIZER_FILENAME)
+        if (!cacheFile.exists()) {
+            Log.d(TAG, "Cache file not found. Copying from assets...")
+            copyFromAssetsToCache(cacheFile)
+        } else {
+            Log.d(TAG, "Tokenizer file already exists in cache.")
+        }
+        return cacheFile
+    }
+
+    private fun copyFromAssetsToCache(destinationFile: File) {
+        try {
+            context.assets.open(TOKENIZER_ASSET_PATH).use { inputStream ->
+                FileOutputStream(destinationFile).use { outputStream ->
+                    inputStream.copyTo(outputStream)
+                }
+            }
+            Log.d(TAG, "Tokenizer file copied to cache.")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to copy tokenizer from assets", e)
+            throw e
+        }
+    }
+
+    private fun loadTokenizerFromFile(file: File): HuggingFaceTokenizer {
+        Log.d(TAG, "Initializing tokenizer from: ${file.absolutePath}")
+        val loadedTokenizer = HuggingFaceTokenizer.newInstance(file.toPath())
+        Log.d(TAG, "Tokenizer initialized.")
+        return loadedTokenizer
+    }
+
+    suspend fun tokenize(text: String): LongArray {
+        initialize()
+        val tokenizer = requireNotNull(tokenizer) { "Tokenizer is not initialized." }
+
+        Log.d(TAG, "Tokenizing text: $text")
+        return withContext(Dispatchers.Default) {
+            tokenizer.encode(text).ids
+        }
+    }
+
+    companion object {
+        private const val TAG = "TokenizerDataSource"
+        private const val TOKENIZER_FILENAME = "tokenizer.json"
+        private const val TOKENIZER_ASSET_PATH = "tokenizer.json"
+    }
+}

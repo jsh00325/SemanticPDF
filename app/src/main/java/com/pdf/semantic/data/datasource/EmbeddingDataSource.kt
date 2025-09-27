@@ -1,6 +1,7 @@
 package com.pdf.semantic.data.datasource
 
 import android.content.Context
+import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
@@ -10,7 +11,6 @@ import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.gpu.CompatibilityList
 import org.tensorflow.lite.gpu.GpuDelegate
 import java.io.FileInputStream
-import java.nio.ByteBuffer
 import java.nio.MappedByteBuffer
 import java.nio.channels.FileChannel
 import javax.inject.Inject
@@ -22,8 +22,6 @@ class EmbeddingDataSource @Inject constructor(
 ) {
     private var interpreter: Interpreter? = null
     private val mutex = Mutex()
-    private val inputBuffer = ByteBuffer.allocateDirect(MAX_SEQ_LEN * 4)
-    private val outputBuffer = ByteBuffer.allocateDirect(OUTPUT_DIM * 4)
 
     private suspend fun initialize() {
         mutex.withLock {
@@ -41,6 +39,7 @@ class EmbeddingDataSource @Inject constructor(
                     }
                 }
                 interpreter = Interpreter(loadModelFile(), options)
+                Log.d(TAG, "Interpreter initialized.")
             }
         }
     }
@@ -60,19 +59,12 @@ class EmbeddingDataSource @Inject constructor(
         initialize()
         val interpreter = requireNotNull(interpreter) { "Interpreter is not initialized." }
 
-        val paddedTokens = tokens.copyOf(MAX_SEQ_LEN)
-        val inputIntArray: IntArray = paddedTokens.map { it.toInt() }.toIntArray()
+        val intTokens = tokens.map { it.toInt() }.toIntArray()
+        val modelInput = arrayOf(intTokens.copyOf(MAX_SEQ_LEN))
+        val modelOutput = Array(1) { FloatArray(OUTPUT_DIM) }
 
-        inputBuffer.rewind()
-        inputBuffer.asIntBuffer().put(inputIntArray)
-
-        outputBuffer.rewind()
-        interpreter.run(inputBuffer, outputBuffer)
-
-        outputBuffer.rewind()
-        val embedding = FloatArray(OUTPUT_DIM)
-        outputBuffer.asFloatBuffer().get(embedding)
-        return embedding
+        interpreter.run(modelInput, modelOutput)
+        return modelOutput[0]
     }
 
     companion object {

@@ -19,6 +19,19 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        ndk {
+            abiFilters.add("arm64-v8a")
+            abiFilters.add("x86_64")
+        }
+
+        externalNativeBuild {
+            cmake {
+                // This argument forces the packaging of the C++ shared library.
+                arguments += "-DANDROID_STL=c++_shared"
+                cppFlags += ""
+            }
+        }
     }
 
     buildTypes {
@@ -39,6 +52,13 @@ android {
     }
     buildFeatures {
         compose = true
+    }
+    ndkVersion = "28.2.13676358"
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+            version = "3.22.1"
+        }
     }
 }
 
@@ -61,11 +81,10 @@ dependencies {
     implementation(libs.litert.gpu.api)
 
     implementation(libs.djl.android.core)
-    implementation(libs.djl.android.pytorch)
-    implementation(libs.djl.android.onnx)
-
-    implementation(libs.djl.huggingface.tokenizer)
-    implementation(libs.djl.android.tokenizer)
+    runtimeOnly(libs.djl.pytorch.engine)
+    runtimeOnly(libs.djl.android.pytorch)
+    runtimeOnly(libs.djl.android.tokeninzer)
+    implementation(libs.djl.huggingface.tokenizers)
 
     ksp(libs.hilt.android.compiler)
     ksp(libs.room.compiler)

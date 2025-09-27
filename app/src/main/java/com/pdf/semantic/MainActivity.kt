@@ -18,6 +18,7 @@ import com.pdf.semantic.data.repositoryImpl.EmbeddingRepositoryImpl
 import com.pdf.semantic.ui.theme.SemanticPDFTheme
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
+import kotlin.math.sqrt
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -32,11 +33,32 @@ class MainActivity : ComponentActivity() {
         "Doc 4" to "Saturn, famous for its rings, is sometimes mistaken for the Red Planet."
     )
 
+    private fun cosineSimilarity(vectorA: FloatArray, vectorB: FloatArray): Float {
+        if (vectorA.size != vectorB.size) {
+            throw IllegalArgumentException("Vectors must be of the same size")
+        }
+        var dotProduct = 0.0
+        var normA = 0.0
+        var normB = 0.0
+        for (i in vectorA.indices) {
+            dotProduct += vectorA[i] * vectorB[i]
+            normA += vectorA[i] * vectorA[i]
+            normB += vectorB[i] * vectorB[i]
+        }
+
+        val denominator = sqrt(normA) * sqrt(normB)
+        if (denominator == 0.0) {
+            return 0.0f
+        }
+
+        return (dotProduct / denominator).toFloat()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent {
-            SemanticPDFTheme { // 앱 테마에 맞게 수정
+            SemanticPDFTheme {
                 Scaffold { innerPadding ->
                     EmbeddingTestScreen(Modifier.padding(innerPadding))
                 }
@@ -46,36 +68,56 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     fun EmbeddingTestScreen(modifier: Modifier) {
-        // 1. 상태 정의: 결과(벡터)를 저장할 Map과 진행 상태를 저장할 Boolean
-        var embeddingResults by remember { mutableStateOf<Map<String, FloatArray>>(emptyMap()) }
         var isProcessing by remember { mutableStateOf(false) }
         var triggerEmbedding by remember { mutableStateOf(false) }
+        var displayResults by remember { mutableStateOf<List<EmbeddingDisplayResult>>(emptyList()) }
 
-        // 2. LaunchedEffect: triggerEmbedding이 true가 되면 순차적으로 임베딩 실행
         LaunchedEffect(triggerEmbedding) {
             if (triggerEmbedding) {
                 isProcessing = true
-                embeddingResults = emptyMap() // 결과 초기화
+                displayResults = emptyList()
+
+                val queryText = textsToEmbed["Query"] ?: ""
+                val queryVector = try {
+                    embeddingRepository.getSematicVector(queryText)
+                } catch (e: Exception) {
+                    Log.e("EmbeddingTestScreen", "Error embedding Query", e)
+                    floatArrayOf()
+                }
+
+                displayResults = displayResults + EmbeddingDisplayResult("Query", queryText, queryVector)
+
+                if (queryVector.isEmpty()) {
+                    isProcessing = false
+                    return@LaunchedEffect
+                }
 
                 for ((key, text) in textsToEmbed) {
-                    try {
-                        // Repository의 suspend 함수 호출
-                        val vector = embeddingRepository.getSematicVector(text)
+                    if (key == "Query") continue
 
-                        // 현재 결과 Map에 새로운 결과를 추가하여 상태 업데이트
-                        embeddingResults = embeddingResults + (key to vector)
-
+                    val docVector = try {
+                        embeddingRepository.getSematicVector(text)
                     } catch (e: Exception) {
                         Log.e("EmbeddingTestScreen", "Error embedding text: $text", e)
-                        // 에러 처리
-                        embeddingResults = embeddingResults + (key to floatArrayOf(-1f)) // 에러 표시
+                        floatArrayOf()
                     }
+
+                    if (docVector.containsNaN()) {
+                        Log.e("MainActivity", "VECTOR CONTAINS NaN for key: $key")
+                    }
+                    if (queryVector.containsNaN()) {
+                        Log.e("MainActivity", "QUERY VECTOR CONTAINS NaN!")
+                    }
+
+                    val similarity = cosineSimilarity(queryVector, docVector)
+
+                    displayResults = displayResults + EmbeddingDisplayResult(key, text, docVector, similarity)
                 }
+
                 isProcessing = false
             }
         }
 
-        // 3. UI 구성
         Surface(modifier = modifier.fillMaxSize()) {
             Column(
                 modifier = Modifier.padding(16.dp),
@@ -83,12 +125,11 @@ class MainActivity : ComponentActivity() {
             ) {
                 Button(
                     onClick = {
-                        // 버튼을 누르면 triggerEmbedding 상태를 변경하여 LaunchedEffect 실행
                         if (!isProcessing) {
                             triggerEmbedding = !triggerEmbedding
                         }
                     },
-                    enabled = !isProcessing // 처리 중일 때는 버튼 비활성화
+                    enabled = !isProcessing
                 ) {
                     Text(if (isProcessing) "임베딩 중..." else "임베딩 시작")
                 }
@@ -96,23 +137,34 @@ class MainActivity : ComponentActivity() {
                 Spacer(modifier = Modifier.height(16.dp))
 
                 LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                    items(embeddingResults.toList()) { (key, vector) ->
+                    items(displayResults) { result ->
                         Card(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
                             Column(modifier = Modifier.padding(12.dp)) {
                                 Text(
-                                    text = key,
+                                    text = result.key,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 16.sp
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Text(
-                                    text = textsToEmbed[key] ?: "",
+                                    text = result.text,
                                     fontSize = 14.sp,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
+
+                                result.similarity?.let {
+                                    Text(
+                                        text = "Cosine Similarity: %.4f".format(it),
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                }
+
                                 Text(
-                                    text = "Vector(size=${vector.size}): [${vector.take(5).joinToString(", ")}...]",
+                                    text = "Vector(size=${result.vector.size}): [${result.vector.take(5).joinToString(", ")}...]",
                                     fontSize = 12.sp,
                                     color = MaterialTheme.colorScheme.outline
                                 )
@@ -122,5 +174,16 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    data class EmbeddingDisplayResult(
+        val key: String,
+        val text: String,
+        val vector: FloatArray,
+        val similarity: Float? = null // Query와의 유사도
+    )
+
+    fun FloatArray.containsNaN(): Boolean {
+        return this.any { it.isNaN() }
     }
 }

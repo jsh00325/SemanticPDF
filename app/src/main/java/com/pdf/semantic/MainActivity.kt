@@ -4,11 +4,26 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -25,15 +40,19 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var embeddingRepository: EmbeddingRepositoryImpl
 
-    private val textsToEmbed = mapOf(
-        "Query" to "Which planet is known as the Red Planet?",
-        "Doc 1" to "Venus is often called Earth's twin because of its similar size and proximity.",
-        "Doc 2" to "Mars, known for its reddish appearance, is often referred to as the Red Planet.",
-        "Doc 3" to "Jupiter, the largest planet in our solar system, has a prominent red spot.",
-        "Doc 4" to "Saturn, famous for its rings, is sometimes mistaken for the Red Planet."
-    )
+    private val textsToEmbed =
+        mapOf(
+            "Query" to "Which planet is known as the Red Planet?",
+            "Doc 1" to "Venus is often called Earth's twin because of its similar size and proximity.",
+            "Doc 2" to "Mars, known for its reddish appearance, is often referred to as the Red Planet.",
+            "Doc 3" to "Jupiter, the largest planet in our solar system, has a prominent red spot.",
+            "Doc 4" to "Saturn, famous for its rings, is sometimes mistaken for the Red Planet.",
+        )
 
-    private fun cosineSimilarity(vectorA: FloatArray, vectorB: FloatArray): Float {
+    private fun cosineSimilarity(
+        vectorA: FloatArray,
+        vectorB: FloatArray,
+    ): Float {
         if (vectorA.size != vectorB.size) {
             throw IllegalArgumentException("Vectors must be of the same size")
         }
@@ -78,12 +97,13 @@ class MainActivity : ComponentActivity() {
                 displayResults = emptyList()
 
                 val queryText = textsToEmbed["Query"] ?: ""
-                val queryVector = try {
-                    embeddingRepository.getSematicVector(queryText)
-                } catch (e: Exception) {
-                    Log.e("EmbeddingTestScreen", "Error embedding Query", e)
-                    floatArrayOf()
-                }
+                val queryVector =
+                    try {
+                        embeddingRepository.getSematicVector(queryText)
+                    } catch (e: Exception) {
+                        Log.e("EmbeddingTestScreen", "Error embedding Query", e)
+                        floatArrayOf()
+                    }
 
                 displayResults = displayResults + EmbeddingDisplayResult("Query", queryText, queryVector)
 
@@ -95,19 +115,13 @@ class MainActivity : ComponentActivity() {
                 for ((key, text) in textsToEmbed) {
                     if (key == "Query") continue
 
-                    val docVector = try {
-                        embeddingRepository.getSematicVector(text)
-                    } catch (e: Exception) {
-                        Log.e("EmbeddingTestScreen", "Error embedding text: $text", e)
-                        floatArrayOf()
-                    }
-
-                    if (docVector.containsNaN()) {
-                        Log.e("MainActivity", "VECTOR CONTAINS NaN for key: $key")
-                    }
-                    if (queryVector.containsNaN()) {
-                        Log.e("MainActivity", "QUERY VECTOR CONTAINS NaN!")
-                    }
+                    val docVector =
+                        try {
+                            embeddingRepository.getSematicVector(text)
+                        } catch (e: Exception) {
+                            Log.e("EmbeddingTestScreen", "Error embedding text: $text", e)
+                            floatArrayOf()
+                        }
 
                     val similarity = cosineSimilarity(queryVector, docVector)
 
@@ -121,7 +135,7 @@ class MainActivity : ComponentActivity() {
         Surface(modifier = modifier.fillMaxSize()) {
             Column(
                 modifier = Modifier.padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Button(
                     onClick = {
@@ -129,7 +143,7 @@ class MainActivity : ComponentActivity() {
                             triggerEmbedding = !triggerEmbedding
                         }
                     },
-                    enabled = !isProcessing
+                    enabled = !isProcessing,
                 ) {
                     Text(if (isProcessing) "임베딩 중..." else "임베딩 시작")
                 }
@@ -143,13 +157,13 @@ class MainActivity : ComponentActivity() {
                                 Text(
                                     text = result.key,
                                     fontWeight = FontWeight.Bold,
-                                    fontSize = 16.sp
+                                    fontSize = 16.sp,
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Text(
                                     text = result.text,
                                     fontSize = 14.sp,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -158,15 +172,17 @@ class MainActivity : ComponentActivity() {
                                         text = "Cosine Similarity: %.4f".format(it),
                                         fontSize = 14.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.primary
+                                        color = MaterialTheme.colorScheme.primary,
                                     )
                                     Spacer(modifier = Modifier.height(8.dp))
                                 }
 
                                 Text(
-                                    text = "Vector(size=${result.vector.size}): [${result.vector.take(5).joinToString(", ")}...]",
+                                    text = "Vector(size=${result.vector.size}): [${result.vector.take(
+                                        5,
+                                    ).joinToString(", ")}...]",
                                     fontSize = 12.sp,
-                                    color = MaterialTheme.colorScheme.outline
+                                    color = MaterialTheme.colorScheme.outline,
                                 )
                             }
                         }
@@ -180,10 +196,6 @@ class MainActivity : ComponentActivity() {
         val key: String,
         val text: String,
         val vector: FloatArray,
-        val similarity: Float? = null // Query와의 유사도
+        val similarity: Float? = null,
     )
-
-    fun FloatArray.containsNaN(): Boolean {
-        return this.any { it.isNaN() }
-    }
 }

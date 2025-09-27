@@ -54,12 +54,14 @@ class EmbeddingDataSource @Inject constructor(
         initialize()
         val interpreter = requireNotNull(interpreter) { "Interpreter is not initialized." }
 
-        val intTokens = tokens.map { it.toInt() }.toIntArray()
-        val modelInput = arrayOf(intTokens.copyOf(MAX_SEQ_LEN))
-        val modelOutput = Array(1) { FloatArray(OUTPUT_DIM) }
+        return withContext(singleThreadDispatcher) {
+            val intTokens = tokens.map { it.toInt() }.toIntArray()
+            val modelInput = arrayOf(intTokens.copyOf(MAX_SEQ_LEN))
+            val modelOutput = Array(1) { FloatArray(OUTPUT_DIM) }
 
-        interpreter.run(modelInput, modelOutput)
-        return modelOutput[0]
+            interpreter.run(modelInput, modelOutput)
+            modelOutput[0]
+        }
     }
 
     companion object {

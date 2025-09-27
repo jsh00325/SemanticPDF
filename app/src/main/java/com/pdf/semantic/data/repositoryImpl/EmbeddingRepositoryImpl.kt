@@ -14,22 +14,21 @@ class EmbeddingRepositoryImpl @Inject constructor(
     private val tokenizerDataSource: TokenizerDataSource,
     private val embeddingDataSource: EmbeddingDataSource
 ) : EmbeddingRepository {
-    override suspend fun getSematicVector(text: String): FloatArray
-        = withContext(Dispatchers.Default) {
-            var tokens: LongArray
-            val tokenizeTime = measureTimeMillis {
-                tokens = tokenizerDataSource.tokenize(text)
-            }
-
-            var semanticVector: FloatArray
-            val embeddingTime = measureTimeMillis {
-                semanticVector = embeddingDataSource.embed(tokens)
-            }
-
-            logExecutionTime(tokenizeTime, embeddingTime)
-
-            semanticVector
+    override suspend fun getSematicVector(text: String): FloatArray {
+        var tokens: LongArray
+        val tokenizeTime = measureTimeMillis {
+            tokens = tokenizerDataSource.tokenize(text)
         }
+
+        var semanticVector: FloatArray
+        val embeddingTime = measureTimeMillis {
+            semanticVector = embeddingDataSource.embed(tokens)
+        }
+
+        logExecutionTime(tokenizeTime, embeddingTime)
+
+        return semanticVector
+    }
 
     private fun logExecutionTime(tokenizeTime: Long, embeddingTime: Long) {
         val totalTime = tokenizeTime + embeddingTime

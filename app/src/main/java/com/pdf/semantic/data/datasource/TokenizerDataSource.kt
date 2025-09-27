@@ -55,7 +55,9 @@ class TokenizerDataSource @Inject constructor(
         initialize()
         val tokenizer = requireNotNull(tokenizer) { "Tokenizer is not initialized." }
 
-        return tokenizer.encode(text).ids
+        return withContext(singleThreadDispatcher) {
+            tokenizer.encode(text).ids
+        }
     }
 
     companion object {

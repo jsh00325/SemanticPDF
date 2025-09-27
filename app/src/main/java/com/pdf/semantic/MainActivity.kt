@@ -1,7 +1,5 @@
 package com.pdf.semantic
 
-// MainActivity.kt
-
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -19,7 +17,6 @@ import androidx.compose.ui.unit.sp
 import com.pdf.semantic.data.repositoryImpl.EmbeddingRepositoryImpl
 import com.pdf.semantic.ui.theme.SemanticPDFTheme
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.delay
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -29,10 +26,10 @@ class MainActivity : ComponentActivity() {
 
     private val textsToEmbed = mapOf(
         "Query" to "Which planet is known as the Red Planet?",
-//        "Doc 1" to "Venus is often called Earth's twin because of its similar size and proximity.",
-//        "Doc 2" to "Mars, known for its reddish appearance, is often referred to as the Red Planet.",
-//        "Doc 3" to "Jupiter, the largest planet in our solar system, has a prominent red spot.",
-//        "Doc 4" to "Saturn, famous for its rings, is sometimes mistaken for the Red Planet."
+        "Doc 1" to "Venus is often called Earth's twin because of its similar size and proximity.",
+        "Doc 2" to "Mars, known for its reddish appearance, is often referred to as the Red Planet.",
+        "Doc 3" to "Jupiter, the largest planet in our solar system, has a prominent red spot.",
+        "Doc 4" to "Saturn, famous for its rings, is sometimes mistaken for the Red Planet."
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -67,9 +64,6 @@ class MainActivity : ComponentActivity() {
 
                         // 현재 결과 Map에 새로운 결과를 추가하여 상태 업데이트
                         embeddingResults = embeddingResults + (key to vector)
-
-                        // 순차적으로 진행되는 것을 시각적으로 확인하기 위해 약간의 딜레이 추가 (선택 사항)
-                        delay(1000)
 
                     } catch (e: Exception) {
                         Log.e("EmbeddingTestScreen", "Error embedding text: $text", e)

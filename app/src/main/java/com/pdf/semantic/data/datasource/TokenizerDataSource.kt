@@ -36,8 +36,6 @@ class TokenizerDataSource @Inject constructor(
         if (!cacheFile.exists()) {
             Log.d(TAG, "Cache file not found. Copying from assets...")
             copyFromAssetsToCache(cacheFile)
-        } else {
-            Log.d(TAG, "Tokenizer file already exists in cache.")
         }
         return cacheFile
     }
@@ -57,7 +55,6 @@ class TokenizerDataSource @Inject constructor(
     }
 
     private fun loadTokenizerFromFile(file: File): HuggingFaceTokenizer {
-        Log.d(TAG, "Initializing tokenizer from: ${file.absolutePath}")
         val loadedTokenizer = HuggingFaceTokenizer.newInstance(file.toPath())
         Log.d(TAG, "Tokenizer initialized.")
         return loadedTokenizer

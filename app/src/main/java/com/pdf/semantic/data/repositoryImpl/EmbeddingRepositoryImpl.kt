@@ -14,9 +14,8 @@ class EmbeddingRepositoryImpl @Inject constructor(
 ) : EmbeddingRepository {
     override suspend fun getSematicVector(text: String): FloatArray
         = withContext(Dispatchers.IO) {
-            Log.d(TAG, "getSematicVector($text)")
             val tokens = tokenizerDataSource.tokenize(text)
-            Log.d(TAG, "Tokenized token: $tokens")
+            Log.d(TAG, "Tokenized token: ${tokens.contentToString()}")
             embeddingDataSource.embed(tokens)
         }
 

@@ -5,8 +5,7 @@ import android.content.Context
 import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
@@ -14,21 +13,19 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
+@OptIn(ExperimentalCoroutinesApi::class)
 class TokenizerDataSource @Inject constructor(
     @ApplicationContext private val context: Context,
 ) {
     private var tokenizer: HuggingFaceTokenizer? = null
-    private val mutex = Mutex()
+    private val singleThreadDispatcher = Dispatchers.IO.limitedParallelism(1)
 
-    private suspend fun initialize() {
-        mutex.withLock {
-            if (tokenizer != null) return
+    private suspend fun initialize() = withContext(singleThreadDispatcher) {
+        if (tokenizer != null) return@withContext
 
-            withContext(Dispatchers.Default) {
-                val tokenizerFile = prepareTokenizerFile()
-                tokenizer = loadTokenizerFromFile(tokenizerFile)
-            }
-        }
+        val tokenizerFile = prepareTokenizerFile()
+        tokenizer = HuggingFaceTokenizer.newInstance(tokenizerFile.toPath())
+        Log.d(TAG, "Tokenizer initialized.")
     }
 
     private fun prepareTokenizerFile(): File {
@@ -54,20 +51,11 @@ class TokenizerDataSource @Inject constructor(
         }
     }
 
-    private fun loadTokenizerFromFile(file: File): HuggingFaceTokenizer {
-        val loadedTokenizer = HuggingFaceTokenizer.newInstance(file.toPath())
-        Log.d(TAG, "Tokenizer initialized.")
-        return loadedTokenizer
-    }
-
     suspend fun tokenize(text: String): LongArray {
         initialize()
         val tokenizer = requireNotNull(tokenizer) { "Tokenizer is not initialized." }
 
-        Log.d(TAG, "Tokenizing text: $text")
-        return withContext(Dispatchers.Default) {
-            tokenizer.encode(text).ids
-        }
+        return tokenizer.encode(text).ids
     }
 
     companion object {

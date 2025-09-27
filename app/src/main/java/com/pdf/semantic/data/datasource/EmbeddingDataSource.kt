@@ -4,8 +4,7 @@ import android.content.Context
 import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.withContext
 import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.gpu.CompatibilityList
@@ -17,31 +16,27 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
+@OptIn(ExperimentalCoroutinesApi::class)
 class EmbeddingDataSource @Inject constructor(
     @ApplicationContext private val context: Context,
 ) {
     private var interpreter: Interpreter? = null
-    private val mutex = Mutex()
+    private val singleThreadDispatcher = Dispatchers.IO.limitedParallelism(1)
 
-    private suspend fun initialize() {
-        mutex.withLock {
-            if (interpreter != null) return
+    private suspend fun initialize() = withContext(singleThreadDispatcher) {
+        if (interpreter != null) return@withContext
 
-            withContext(Dispatchers.IO) {
-                val compatList = CompatibilityList()
-                val options = Interpreter.Options().apply {
-                    if (compatList.isDelegateSupportedOnThisDevice) {
-                        // if the device has a supported GPU, add the GPU delegate
-                        val delegateOptions = compatList.bestOptionsForThisDevice
-                        this.addDelegate(GpuDelegate(delegateOptions))
-                    } else {
-                        this.setNumThreads(Runtime.getRuntime().availableProcessors())
-                    }
-                }
-                interpreter = Interpreter(loadModelFile(), options)
-                Log.d(TAG, "Interpreter initialized.")
+        val compatList = CompatibilityList()
+        val options = Interpreter.Options().apply {
+            if (compatList.isDelegateSupportedOnThisDevice) {
+                val delegateOptions = compatList.bestOptionsForThisDevice
+                this.addDelegate(GpuDelegate(delegateOptions))
+            } else {
+                this.setNumThreads(Runtime.getRuntime().availableProcessors())
             }
         }
+        interpreter = Interpreter(loadModelFile(), options)
+        Log.d(TAG, "Interpreter initialized.")
     }
 
     private fun loadModelFile(): MappedByteBuffer {

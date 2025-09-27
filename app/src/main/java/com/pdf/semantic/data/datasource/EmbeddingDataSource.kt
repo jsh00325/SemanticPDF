@@ -1,7 +1,6 @@
 package com.pdf.semantic.data.datasource
 
 import android.content.Context
-import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
@@ -23,7 +22,7 @@ class EmbeddingDataSource @Inject constructor(
 ) {
     private var interpreter: Interpreter? = null
     private val mutex = Mutex()
-    private val inputBuffer = ByteBuffer.allocateDirect(MAX_SEQ_LEN * Long.SIZE_BYTES)
+    private val inputBuffer = ByteBuffer.allocateDirect(MAX_SEQ_LEN * 4)
     private val outputBuffer = ByteBuffer.allocateDirect(OUTPUT_DIM * 4)
 
     private suspend fun initialize() {
@@ -62,9 +61,10 @@ class EmbeddingDataSource @Inject constructor(
         val interpreter = requireNotNull(interpreter) { "Interpreter is not initialized." }
 
         val paddedTokens = tokens.copyOf(MAX_SEQ_LEN)
+        val inputIntArray: IntArray = paddedTokens.map { it.toInt() }.toIntArray()
 
         inputBuffer.rewind()
-        inputBuffer.asLongBuffer().put(paddedTokens)
+        inputBuffer.asIntBuffer().put(inputIntArray)
 
         outputBuffer.rewind()
         interpreter.run(inputBuffer, outputBuffer)

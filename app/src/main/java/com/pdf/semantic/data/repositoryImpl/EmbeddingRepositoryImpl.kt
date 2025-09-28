@@ -14,11 +14,19 @@ class EmbeddingRepositoryImpl
         private val tokenizerDataSource: TokenizerDataSource,
         private val embeddingDataSource: EmbeddingDataSource,
     ) : EmbeddingRepository {
-        override suspend fun getSematicVector(text: String): FloatArray {
+        override suspend fun embedQueryForRetrieval(query: String): FloatArray =
+            embedInput("task: search result | query: $query")
+
+        override suspend fun embedDocumentForRetrieval(
+            title: String?,
+            text: String,
+        ): FloatArray = embedInput("title: ${title ?: "none"} | text: $text")
+
+        private suspend fun embedInput(input: String): FloatArray {
             var tokens: LongArray
             val tokenizeTime =
                 measureTimeMillis {
-                    tokens = tokenizerDataSource.tokenize(text)
+                    tokens = tokenizerDataSource.tokenize(input)
                 }
 
             var semanticVector: FloatArray

@@ -99,7 +99,7 @@ class MainActivity : ComponentActivity() {
                 val queryText = textsToEmbed["Query"] ?: ""
                 val queryVector =
                     try {
-                        embeddingRepository.getSematicVector(queryText)
+                        embeddingRepository.embedQueryForRetrieval(queryText)
                     } catch (e: Exception) {
                         Log.e("EmbeddingTestScreen", "Error embedding Query", e)
                         floatArrayOf()
@@ -117,7 +117,7 @@ class MainActivity : ComponentActivity() {
 
                     val docVector =
                         try {
-                            embeddingRepository.getSematicVector(text)
+                            embeddingRepository.embedDocumentForRetrieval(null, text)
                         } catch (e: Exception) {
                             Log.e("EmbeddingTestScreen", "Error embedding text: $text", e)
                             floatArrayOf()

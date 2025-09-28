@@ -76,9 +76,9 @@ dependencies {
     implementation(libs.room.ktx)
 
     implementation(libs.litert)
-    implementation(libs.litert.support)
-    implementation(libs.litert.gpu)
-    implementation(libs.litert.gpu.api)
+//    implementation(libs.litert.support)
+//    implementation(libs.litert.gpu)
+//    implementation(libs.litert.gpu.api)
 
     implementation(libs.djl.android.core)
     runtimeOnly(libs.djl.pytorch.engine)

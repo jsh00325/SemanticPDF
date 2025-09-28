@@ -2,16 +2,13 @@ package com.pdf.semantic.data.datasource
 
 import android.content.Context
 import android.util.Log
+import com.google.ai.edge.litert.Accelerator
+import com.google.ai.edge.litert.CompiledModel
+import com.google.ai.edge.litert.TensorBuffer
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.withContext
-import org.tensorflow.lite.Interpreter
-import org.tensorflow.lite.gpu.CompatibilityList
-import org.tensorflow.lite.gpu.GpuDelegate
-import java.io.FileInputStream
-import java.nio.MappedByteBuffer
-import java.nio.channels.FileChannel
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -22,49 +19,41 @@ class EmbeddingDataSource
     constructor(
         @ApplicationContext private val context: Context,
     ) {
-        private var interpreter: Interpreter? = null
+        private var model: CompiledModel? = null
+        private var inputBuffers: List<TensorBuffer>? = null
+        private var outputBuffers: List<TensorBuffer>? = null
         private val singleThreadDispatcher = Dispatchers.IO.limitedParallelism(1)
 
         private suspend fun initialize() =
             withContext(singleThreadDispatcher) {
-                if (interpreter != null) return@withContext
+                if (model != null) return@withContext
 
-                val compatList = CompatibilityList()
-                val options =
-                    Interpreter.Options().apply {
-                        if (compatList.isDelegateSupportedOnThisDevice) {
-                            val delegateOptions = compatList.bestOptionsForThisDevice
-                            this.addDelegate(GpuDelegate(delegateOptions))
-                        } else {
-                            this.setNumThreads(Runtime.getRuntime().availableProcessors())
-                        }
-                    }
-                interpreter = Interpreter(loadModelFile(), options)
-                Log.d(TAG, "Interpreter initialized.")
+                val compiledModel =
+                    CompiledModel.create(
+                        context.assets,
+                        EMBEDDING_MODEL,
+                        CompiledModel.Options(Accelerator.GPU),
+                        null,
+                    )
+                model = compiledModel
+                inputBuffers = compiledModel.createInputBuffers()
+                outputBuffers = compiledModel.createOutputBuffers()
+                Log.d(TAG, "Embedding Model initialized.")
             }
-
-        private fun loadModelFile(): MappedByteBuffer {
-            val fileDescriptor = context.assets.openFd(EMBEDDING_MODEL)
-            val inputStream = FileInputStream(fileDescriptor.fileDescriptor)
-            val fileChannel = inputStream.channel
-            val startOffset = fileDescriptor.startOffset
-            val declaredLength = fileDescriptor.declaredLength
-            val retFile = fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength)
-            fileDescriptor.close()
-            return retFile
-        }
 
         suspend fun embed(tokens: LongArray): FloatArray {
             initialize()
-            val interpreter = requireNotNull(interpreter) { "Interpreter is not initialized." }
+            val model = requireNotNull(model) { "Embedding Model is not initialized." }
+            val inputBuffers = requireNotNull(inputBuffers) { "Input Buffers are not initialized." }
+            val outputBuffers = requireNotNull(outputBuffers) { "Output Buffers are not initialized." }
 
             return withContext(singleThreadDispatcher) {
                 val intTokens = tokens.map { it.toInt() }.toIntArray()
-                val modelInput = arrayOf(intTokens.copyOf(MAX_SEQ_LEN))
-                val modelOutput = Array(1) { FloatArray(OUTPUT_DIM) }
+                inputBuffers[0].writeInt(intTokens.copyOf(MAX_SEQ_LEN))
 
-                interpreter.run(modelInput, modelOutput)
-                modelOutput[0]
+                model.run(inputBuffers, outputBuffers)
+
+                outputBuffers[0].readFloat()
             }
         }
 

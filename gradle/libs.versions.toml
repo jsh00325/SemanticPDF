@@ -12,7 +12,7 @@ spotless = "7.0.3"
 ksp = "2.0.21-1.0.27"
 hilt = "2.56.2"
 room = "2.7.1"
-litert = "1.4.0"
+litert = "2.0.2"
 djl = "0.33.0"
 
 [libraries]

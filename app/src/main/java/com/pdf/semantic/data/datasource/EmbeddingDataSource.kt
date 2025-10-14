@@ -4,7 +4,6 @@ import android.content.Context
 import android.util.Log
 import com.google.ai.edge.litert.Accelerator
 import com.google.ai.edge.litert.CompiledModel
-import com.google.ai.edge.litert.TensorBuffer
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -20,27 +19,7 @@ class EmbeddingDataSource
         @ApplicationContext private val context: Context,
     ) {
         private val modelCache = mutableMapOf<ModelType, CompiledModel>()
-        private var model: CompiledModel? = null
-        private var inputBuffers: List<TensorBuffer>? = null
-        private var outputBuffers: List<TensorBuffer>? = null
         private val singleThreadDispatcher = Dispatchers.IO.limitedParallelism(1)
-
-        private suspend fun initialize() =
-            withContext(singleThreadDispatcher) {
-                if (model != null) return@withContext
-
-                val compiledModel =
-                    CompiledModel.create(
-                        context.assets,
-                        EMBEDDING_MODEL,
-                        CompiledModel.Options(Accelerator.CPU),
-                        null,
-                    )
-                model = compiledModel
-                inputBuffers = compiledModel.createInputBuffers()
-                outputBuffers = compiledModel.createOutputBuffers()
-                Log.d(TAG, "Embedding Model initialized.")
-            }
 
         private suspend fun getModel(modelType: ModelType): CompiledModel =
             withContext(singleThreadDispatcher) {
@@ -56,15 +35,28 @@ class EmbeddingDataSource
                 }
             }
 
+        private suspend fun getModelForTokens(tokenCount: Int): Pair<CompiledModel, Int> {
+            val modelType =
+                if (tokenCount > ModelType.SEQ_512.maxSeqLength) {
+                    ModelType.SEQ_2048
+                } else {
+                    ModelType.SEQ_512
+                }
+
+            return getModel(modelType) to modelType.maxSeqLength
+        }
+
         suspend fun embed(tokens: LongArray): FloatArray {
-            initialize()
-            val model = requireNotNull(model) { "Embedding Model is not initialized." }
-            val inputBuffers = requireNotNull(inputBuffers) { "Input Buffers are not initialized." }
-            val outputBuffers = requireNotNull(outputBuffers) { "Output Buffers are not initialized." }
+            val (model, inputDimension) = getModelForTokens(tokens.size)
 
             return withContext(singleThreadDispatcher) {
+                val inputBuffers = model.createInputBuffers()
+                val outputBuffers = model.createOutputBuffers()
+
                 val intTokens = tokens.map { it.toInt() }.toIntArray()
-                inputBuffers[0].writeInt(intTokens.copyOf(MAX_SEQ_LEN))
+                val paddedTokens = intTokens.copyOf(inputDimension)
+
+                inputBuffers[0].writeInt(paddedTokens)
 
                 model.run(inputBuffers, outputBuffers)
 
@@ -85,8 +77,5 @@ class EmbeddingDataSource
 
         companion object {
             private const val TAG = "EmbeddingDataSource"
-            private const val EMBEDDING_MODEL = "embeddinggemma-300M_seq512_mixed-precision.tflite"
-            private const val MAX_SEQ_LEN = 512
-            private const val OUTPUT_DIM = 768
         }
     }

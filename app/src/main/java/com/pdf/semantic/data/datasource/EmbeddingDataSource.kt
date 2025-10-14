@@ -57,6 +57,17 @@ class EmbeddingDataSource
             }
         }
 
+        private enum class ModelType(val modelName: String, val maxSeqLength: Int) {
+            SEQ_512(
+                modelName = "embeddinggemma-300M_seq512_mixed-precision.tflite",
+                maxSeqLength = 512
+            ),
+            SEQ_2048(
+                modelName = "embeddinggemma-300M_seq2048_mixed-precision.tflite",
+                maxSeqLength = 2048
+            )
+        }
+
         companion object {
             private const val TAG = "EmbeddingDataSource"
             private const val EMBEDDING_MODEL = "embeddinggemma-300M_seq512_mixed-precision.tflite"

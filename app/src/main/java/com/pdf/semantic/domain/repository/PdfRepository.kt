@@ -1,10 +1,8 @@
 package com.pdf.semantic.domain.repository
 
 import android.net.Uri
+import com.pdf.semantic.domain.model.PdfDocument
 
 interface PdfRepository {
-    /*
-   URI의 PDF 파일 파싱, DB에 저장
-    */
-    suspend fun parsePdf(uri: Uri): List<String>
+    suspend fun parsePdf(uri: Uri): PdfDocument
 }

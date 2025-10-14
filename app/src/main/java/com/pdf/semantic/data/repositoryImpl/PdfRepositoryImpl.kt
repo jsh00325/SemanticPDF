@@ -2,39 +2,48 @@ package com.pdf.semantic.data.repositoryImpl
 
 import android.content.Context
 import android.net.Uri
+import com.pdf.semantic.domain.model.PdfDocument
+import com.pdf.semantic.domain.model.Slide
 import com.pdf.semantic.domain.repository.PdfRepository
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
 import com.tom_roush.pdfbox.pdmodel.PDDocument
 import com.tom_roush.pdfbox.text.PDFTextStripper
-import dagger.hilt.android.qualifiers.ApplicationContext
-import jakarta.inject.Inject
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
-class PdfRepositoryImpl @Inject constructor(
-    @ApplicationContext private val context: Context
+class PdfRepositoryImpl(
+    private val context: Context
 ) : PdfRepository {
 
     init {
+        // 앱 시작 시 한 번만 호출하는 것이 좋지만, Repository 생성 시 초기화도 가능합니다.
         PDFBoxResourceLoader.init(context)
     }
 
-    override suspend fun parsePdf(uri: Uri): List<String> {
-        val parsedText = mutableListOf<String>()
-        try {
+    override suspend fun parsePdf(uri: Uri): PdfDocument {
+        return withContext(Dispatchers.IO) {
+            val slides = mutableListOf<Slide>()
+
             context.contentResolver.openInputStream(uri)?.use { inputStream ->
                 val document = PDDocument.load(inputStream)
-                val stripper = PDFTextStripper()
-                for (i in 1..document.numberOfPages) {
-                    stripper.startPage = i
-                    stripper.endPage = i
-                    val text = stripper.getText(document)
-                    parsedText.add(text)
+                val pdfStripper = PDFTextStripper()
+
+                for (page in 1..document.numberOfPages) {
+                    pdfStripper.startPage = page
+                    pdfStripper.endPage = page
+                    val text = pdfStripper.getText(document)
+
+                    slides.add(
+                        Slide(
+                            slideNumber = page,
+                            content = text.trim()
+                        )
+                    )
                 }
                 document.close()
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            // 예외 처리
+            } ?: throw IllegalStateException("Uri로부터 InputStream을 열 수 없습니다: $uri")
+
+            PdfDocument(uri = uri, slides = slides)
         }
-        return parsedText
     }
 }

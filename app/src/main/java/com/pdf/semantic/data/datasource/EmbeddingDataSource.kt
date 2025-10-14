@@ -19,6 +19,7 @@ class EmbeddingDataSource
     constructor(
         @ApplicationContext private val context: Context,
     ) {
+        private val modelCache = mutableMapOf<ModelType, CompiledModel>()
         private var model: CompiledModel? = null
         private var inputBuffers: List<TensorBuffer>? = null
         private var outputBuffers: List<TensorBuffer>? = null
@@ -39,6 +40,20 @@ class EmbeddingDataSource
                 inputBuffers = compiledModel.createInputBuffers()
                 outputBuffers = compiledModel.createOutputBuffers()
                 Log.d(TAG, "Embedding Model initialized.")
+            }
+
+        private suspend fun getModel(modelType: ModelType): CompiledModel =
+            withContext(singleThreadDispatcher) {
+                modelCache.getOrPut(modelType) {
+                    CompiledModel.create(
+                        context.assets,
+                        modelType.modelName,
+                        CompiledModel.Options(Accelerator.CPU),
+                        null,
+                    ).also {
+                        Log.d(TAG, "${modelType.maxSeqLength} Model initialized.")
+                    }
+                }
             }
 
         suspend fun embed(tokens: LongArray): FloatArray {

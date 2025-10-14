@@ -20,7 +20,7 @@ class EmbeddingRepositoryImpl
         override suspend fun embedDocumentForRetrieval(
             title: String?,
             text: String,
-        ): FloatArray = embedInput("title: ${title ?: "none"} | text: $text")
+        ): FloatArray = embedInput("title: ${title ?: "\"none\""} | text: $text")
 
         private suspend fun embedInput(input: String): FloatArray {
             var tokens: LongArray

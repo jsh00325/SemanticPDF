@@ -32,7 +32,7 @@ class EmbeddingDataSource
                     CompiledModel.create(
                         context.assets,
                         EMBEDDING_MODEL,
-                        CompiledModel.Options(Accelerator.GPU),
+                        CompiledModel.Options(Accelerator.CPU),
                         null,
                     )
                 model = compiledModel
@@ -59,8 +59,8 @@ class EmbeddingDataSource
 
         companion object {
             private const val TAG = "EmbeddingDataSource"
-            private const val EMBEDDING_MODEL = "embeddinggemma-300M_seq2048_mixed-precision.tflite"
-            private const val MAX_SEQ_LEN = 2048
+            private const val EMBEDDING_MODEL = "embeddinggemma-300M_seq512_mixed-precision.tflite"
+            private const val MAX_SEQ_LEN = 512
             private const val OUTPUT_DIM = 768
         }
     }

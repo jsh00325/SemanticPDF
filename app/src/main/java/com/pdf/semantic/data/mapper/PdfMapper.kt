@@ -1,6 +1,6 @@
 package com.pdf.semantic.data.mapper
 
-import com.pdf.semantic.data.datasource.local.SlideEntity
+import com.pdf.semantic.data.entity.SlideEntity
 import com.pdf.semantic.domain.model.Slide
 
 fun SlideEntity.toDomain(): Slide =

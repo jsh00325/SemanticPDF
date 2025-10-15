@@ -1,4 +1,4 @@
-package com.pdf.semantic.data.datasource.local
+package com.pdf.semantic.data.entity
 
 import androidx.room.Entity
 

@@ -3,7 +3,13 @@ package com.pdf.semantic.presentation
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
@@ -20,40 +26,42 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+
 @Composable
-fun PdfSelectorScreen(
-    viewModel: PdfSelectorViewModel = hiltViewModel()
-) {
+fun PdfSelectorScreen(viewModel: PdfSelectorViewModel = hiltViewModel()) {
     val pdfDocument by viewModel.pdfDocument
     val isLoading by viewModel.isLoading
     val errorMessage by viewModel.errorMessage
 
-    val selectPdfLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent(),
-        onResult = { uri: Uri? ->
-            //파일이 선택되면 파싱을 시작
-            uri?.let {
-                viewModel.onPdfSelected(it)
-            }
-        }
-    )
+    val selectPdfLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.GetContent(),
+            onResult = { uri: Uri? ->
+                // 파일이 선택되면 파싱을 시작
+                uri?.let {
+                    viewModel.onPdfSelected(it)
+                }
+            },
+        )
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            // 좌우 패딩은 16dp, 상하 패딩은 32dp로 설정
-            .padding(horizontal = 16.dp, vertical = 32.dp),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                // 좌우 패딩은 16dp, 상하 패딩은 32dp로 설정
+                .padding(horizontal = 16.dp, vertical = 32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top
+        verticalArrangement = Arrangement.Top,
     ) {
         Button(
             onClick = {
                 selectPdfLauncher.launch("application/pdf")
             },
             enabled = !isLoading,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color.Blue
-            )
+            colors =
+                ButtonDefaults.buttonColors(
+                    containerColor = Color.Blue,
+                ),
         ) {
             Text("PDF 파일 선택하기")
         }
@@ -69,7 +77,7 @@ fun PdfSelectorScreen(
             Text(
                 text = message,
                 color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodyLarge
+                style = MaterialTheme.typography.bodyLarge,
             )
         }
 
@@ -77,19 +85,20 @@ fun PdfSelectorScreen(
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(doc.slides) { slide ->
                     Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp)
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp),
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
                             Text(
                                 text = "페이지: ${slide.slideNumber}",
-                                style = MaterialTheme.typography.titleMedium
+                                style = MaterialTheme.typography.titleMedium,
                             )
                             Divider(modifier = Modifier.padding(vertical = 8.dp))
                             Text(
                                 text = if (slide.content.isNotBlank()) slide.content else "추출된 텍스트가 없습니다.",
-                                style = MaterialTheme.typography.bodyMedium
+                                style = MaterialTheme.typography.bodyMedium,
                             )
                         }
                     }

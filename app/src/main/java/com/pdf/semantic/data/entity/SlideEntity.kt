@@ -1,4 +1,4 @@
-package com.pdf.semantic.data.datasource.local
+package com.pdf.semantic.data.entity
 
 import androidx.room.Entity
 
@@ -6,5 +6,5 @@ import androidx.room.Entity
 data class SlideEntity(
     val pdfUri: String,
     val slideNo: Int,
-    val content: String
+    val content: String,
 )

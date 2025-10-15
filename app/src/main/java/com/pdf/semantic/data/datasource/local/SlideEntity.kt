@@ -6,5 +6,5 @@ import androidx.room.Entity
 data class SlideEntity(
     val pdfUri: String,
     val slideNo: Int,
-    val content: String
+    val content: String,
 )

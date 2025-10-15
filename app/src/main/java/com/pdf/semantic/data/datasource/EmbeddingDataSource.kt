@@ -24,14 +24,15 @@ class EmbeddingDataSource
         private suspend fun getModel(modelType: ModelType): CompiledModel =
             withContext(singleThreadDispatcher) {
                 modelCache.getOrPut(modelType) {
-                    CompiledModel.create(
-                        context.assets,
-                        modelType.modelName,
-                        CompiledModel.Options(Accelerator.CPU),
-                        null,
-                    ).also {
-                        Log.d(TAG, "${modelType.maxSeqLength} Model initialized.")
-                    }
+                    CompiledModel
+                        .create(
+                            context.assets,
+                            modelType.modelName,
+                            CompiledModel.Options(Accelerator.CPU),
+                            null,
+                        ).also {
+                            Log.d(TAG, "${modelType.maxSeqLength} Model initialized.")
+                        }
                 }
             }
 
@@ -64,15 +65,18 @@ class EmbeddingDataSource
             }
         }
 
-        private enum class ModelType(val modelName: String, val maxSeqLength: Int) {
+        private enum class ModelType(
+            val modelName: String,
+            val maxSeqLength: Int,
+        ) {
             SEQ_512(
                 modelName = "embeddinggemma-300M_seq512_mixed-precision.tflite",
-                maxSeqLength = 512
+                maxSeqLength = 512,
             ),
             SEQ_2048(
                 modelName = "embeddinggemma-300M_seq2048_mixed-precision.tflite",
-                maxSeqLength = 2048
-            )
+                maxSeqLength = 2048,
+            ),
         }
 
         companion object {

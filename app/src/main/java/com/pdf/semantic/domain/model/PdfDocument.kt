@@ -4,5 +4,5 @@ import android.net.Uri
 
 data class PdfDocument(
     val uri: Uri,
-    val slides: List<Slide>
+    val slides: List<Slide>,
 )

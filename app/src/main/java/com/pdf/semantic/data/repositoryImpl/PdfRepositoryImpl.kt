@@ -12,16 +12,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class PdfRepositoryImpl(
-    private val context: Context
+    private val context: Context,
 ) : PdfRepository {
-
     init {
         // 앱 시작 시 한 번만 호출하는 것이 좋지만, Repository 생성 시 초기화도 가능합니다.
         PDFBoxResourceLoader.init(context)
     }
 
-    override suspend fun parsePdf(uri: Uri): PdfDocument {
-        return withContext(Dispatchers.IO) {
+    override suspend fun parsePdf(uri: Uri): PdfDocument =
+        withContext(Dispatchers.IO) {
             val slides = mutableListOf<Slide>()
 
             context.contentResolver.openInputStream(uri)?.use { inputStream ->
@@ -36,8 +35,8 @@ class PdfRepositoryImpl(
                     slides.add(
                         Slide(
                             slideNumber = page,
-                            content = text.trim()
-                        )
+                            content = text.trim(),
+                        ),
                     )
                 }
                 document.close()
@@ -45,5 +44,4 @@ class PdfRepositoryImpl(
 
             PdfDocument(uri = uri, slides = slides)
         }
-    }
 }

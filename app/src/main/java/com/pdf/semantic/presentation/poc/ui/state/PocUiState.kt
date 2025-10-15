@@ -22,4 +22,8 @@ sealed class PocUiState {
         val query: String,
         val topRelevantPageNumbers: List<Int>,
     ) : PocUiState()
+
+    data class Error(
+        val message: String,
+    ) : PocUiState()
 }

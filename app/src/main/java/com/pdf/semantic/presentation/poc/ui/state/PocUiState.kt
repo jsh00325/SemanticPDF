@@ -1,11 +1,12 @@
 package com.pdf.semantic.presentation.poc.ui.state
 
 import com.pdf.semantic.domain.model.PdfDocument
+import com.pdf.semantic.domain.model.Slide
 
 sealed class PocUiState {
     object Idle : PocUiState()
 
-    data class PdfProcessing(
+    data class Processing(
         val message: String,
     ) : PocUiState()
 
@@ -13,14 +14,10 @@ sealed class PocUiState {
         val pdfDocument: PdfDocument,
     ) : PocUiState()
 
-    data class QueryProcessing(
-        val message: String,
-    ) : PocUiState()
-
     data class SearchComplete(
         val pdfDocument: PdfDocument,
         val query: String,
-        val topRelevantPageNumbers: List<Int>,
+        val topRelevantSlide: List<Slide>,
     ) : PocUiState()
 
     data class Error(

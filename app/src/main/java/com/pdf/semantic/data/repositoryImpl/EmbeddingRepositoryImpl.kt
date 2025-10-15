@@ -6,8 +6,10 @@ import com.pdf.semantic.data.datasource.TokenizerDataSource
 import com.pdf.semantic.domain.repository.EmbeddingRepository
 import java.text.NumberFormat
 import javax.inject.Inject
+import javax.inject.Singleton
 import kotlin.system.measureTimeMillis
 
+@Singleton
 class EmbeddingRepositoryImpl
     @Inject
     constructor(

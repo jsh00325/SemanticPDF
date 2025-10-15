@@ -9,10 +9,10 @@ import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
 import com.tom_roush.pdfbox.pdmodel.PDDocument
 import com.tom_roush.pdfbox.text.PDFTextStripper
 import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
+import javax.inject.Singleton
 
 @Singleton
 class PdfRepositoryImpl
@@ -41,6 +41,7 @@ class PdfRepositoryImpl
                             Slide(
                                 slideNumber = page,
                                 content = text.trim(),
+                                similarity = null,
                             ),
                         )
                     }

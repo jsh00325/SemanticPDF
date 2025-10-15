@@ -7,6 +7,7 @@ fun SlideEntity.toDomain(): Slide =
     Slide(
         slideNumber = this.slideNo,
         content = this.content,
+        similarity = null,
     )
 
 fun Slide.toEntity(pdfUri: String): SlideEntity =

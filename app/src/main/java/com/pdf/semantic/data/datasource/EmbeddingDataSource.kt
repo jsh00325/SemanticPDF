@@ -7,13 +7,11 @@ import com.google.ai.edge.litert.CompiledModel
 import com.pdf.semantic.di.ModelDispatcher
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-@OptIn(ExperimentalCoroutinesApi::class)
 class EmbeddingDataSource
     @Inject
     constructor(

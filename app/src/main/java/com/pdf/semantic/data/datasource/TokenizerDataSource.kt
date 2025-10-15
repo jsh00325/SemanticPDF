@@ -6,7 +6,6 @@ import android.util.Log
 import com.pdf.semantic.di.ModelDispatcher
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
@@ -14,7 +13,6 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-@OptIn(ExperimentalCoroutinesApi::class)
 class TokenizerDataSource
     @Inject
     constructor(

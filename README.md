@@ -1,4 +1,3 @@
-
 # SemanticPDF
 This app is for those who wish to leverage an AI-powered **semantic search**, based on **Embedding Gemma**, to intelligently navigate and find information in their lecture notes.
 
@@ -14,4 +13,3 @@ This app is for those who wish to leverage an AI-powered **semantic search**, ba
 
 ### Method 2.
 - Download APK file. **[[click this]](https://github.com/jsh00325/SemanticPDF)**
-

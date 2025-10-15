@@ -4,8 +4,9 @@ import android.content.Context
 import android.util.Log
 import com.google.ai.edge.litert.Accelerator
 import com.google.ai.edge.litert.CompiledModel
+import com.pdf.semantic.di.ModelDispatcher
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -17,12 +18,12 @@ class EmbeddingDataSource
     @Inject
     constructor(
         @ApplicationContext private val context: Context,
+        @ModelDispatcher private val modelDispatcher: CoroutineDispatcher,
     ) {
         private val modelCache = mutableMapOf<ModelType, CompiledModel>()
-        private val singleThreadDispatcher = Dispatchers.IO.limitedParallelism(1)
 
         private suspend fun getModel(modelType: ModelType): CompiledModel =
-            withContext(singleThreadDispatcher) {
+            withContext(modelDispatcher) {
                 modelCache.getOrPut(modelType) {
                     CompiledModel
                         .create(
@@ -50,7 +51,7 @@ class EmbeddingDataSource
         suspend fun embed(tokens: LongArray): FloatArray {
             val (model, inputDimension) = getModelForTokens(tokens.size)
 
-            return withContext(singleThreadDispatcher) {
+            return withContext(modelDispatcher) {
                 val inputBuffers = model.createInputBuffers()
                 val outputBuffers = model.createOutputBuffers()
 

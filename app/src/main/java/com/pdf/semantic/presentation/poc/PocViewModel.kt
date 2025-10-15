@@ -3,7 +3,9 @@ package com.pdf.semantic.presentation.poc
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.pdf.semantic.domain.model.PdfDocument
 import com.pdf.semantic.domain.usecase.ParsePdfUseCase
+import com.pdf.semantic.domain.usecase.SearchRelatedSlideUseCase
 import com.pdf.semantic.presentation.poc.ui.state.PocUiState
 import com.tom_roush.pdfbox.pdmodel.encryption.InvalidPasswordException
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,13 +20,14 @@ class PocViewModel
     @Inject
     constructor(
         private val parsePdfUseCase: ParsePdfUseCase,
+        private val searchRelatedUseCase: SearchRelatedSlideUseCase,
     ) : ViewModel() {
         private val _uiState = MutableStateFlow<PocUiState>(PocUiState.Idle)
         val uiState: StateFlow<PocUiState> = _uiState.asStateFlow()
 
         fun onPdfSelected(uri: Uri) {
             viewModelScope.launch {
-                _uiState.emit(PocUiState.PdfProcessing("PDF 파싱 중입니다..."))
+                _uiState.emit(PocUiState.Processing("PDF 파싱 중입니다..."))
 
                 parsePdfUseCase(uri)
                     .onSuccess { document ->
@@ -39,6 +42,19 @@ class PocViewModel
                             }
                         _uiState.emit(PocUiState.Error(errorMessage))
                     }
+            }
+        }
+
+        fun onSearch(
+            query: String,
+            pdfDocument: PdfDocument,
+        ) {
+            viewModelScope.launch {
+                _uiState.emit(PocUiState.Processing("검색 중입니다..."))
+
+                val result = searchRelatedUseCase(query, pdfDocument)
+
+                _uiState.emit(PocUiState.SearchComplete(pdfDocument, query, result))
             }
         }
     }

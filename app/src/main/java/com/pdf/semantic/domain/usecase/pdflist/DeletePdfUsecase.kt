@@ -1,8 +1,8 @@
-package com.pdf.semantic.domain.usecase.global_search
+package com.pdf.semantic.domain.usecase.pdflist
 
 import javax.inject.Inject
 
-class SearchGlobalUsecase
+class DeletePdfUsecase
     @Inject
     constructor() {
         suspend operator fun invoke() {

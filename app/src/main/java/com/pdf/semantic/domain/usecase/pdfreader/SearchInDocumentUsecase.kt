@@ -1,8 +1,8 @@
-package com.pdf.semantic.domain.usecase.pdf_list
+package com.pdf.semantic.domain.usecase.pdfreader
 
 import javax.inject.Inject
 
-class AddPdfUsecase
+class SearchInDocumentUsecase
     @Inject
     constructor() {
         suspend operator fun invoke() {

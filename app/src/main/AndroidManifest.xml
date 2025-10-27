@@ -13,7 +13,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SemanticPDF">
         <activity
-            android:name=".presentation.poc.PocActivity"
+            android:name=".poc.PocActivity"
             android:exported="true"
             android:label="@string/title_activity_poc"
             android:theme="@style/Theme.SemanticPDF">
@@ -23,11 +23,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".MainActivity"
-            android:exported="false"
-            android:theme="@style/Theme.SemanticPDF"
-            tools:ignore="Instantiatable" />
     </application>
 
 </manifest>

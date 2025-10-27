@@ -1,4 +1,4 @@
-package com.pdf.semantic.presentation.poc
+package com.pdf.semantic.poc
 
 import android.net.Uri
 import androidx.lifecycle.ViewModel
@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.pdf.semantic.domain.model.PdfDocument
 import com.pdf.semantic.domain.usecase.ParsePdfUseCase
 import com.pdf.semantic.domain.usecase.SearchRelatedSlideUseCase
-import com.pdf.semantic.presentation.poc.ui.state.PocUiState
+import com.pdf.semantic.poc.ui.state.PocUiState
 import com.tom_roush.pdfbox.pdmodel.encryption.InvalidPasswordException
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

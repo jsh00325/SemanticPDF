@@ -1,4 +1,4 @@
-package com.pdf.semantic.presentation.poc.ui.composable
+package com.pdf.semantic.poc.ui.composable
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row

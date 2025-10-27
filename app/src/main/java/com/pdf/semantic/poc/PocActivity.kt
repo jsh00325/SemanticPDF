@@ -1,10 +1,10 @@
-package com.pdf.semantic.presentation.poc
+package com.pdf.semantic.poc
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import com.pdf.semantic.presentation.poc.ui.theme.SemanticPDFTheme
+import com.pdf.semantic.poc.ui.theme.SemanticPDFTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

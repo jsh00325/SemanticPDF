@@ -1,4 +1,4 @@
-package com.pdf.semantic.presentation.poc
+package com.pdf.semantic.poc
 
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -35,10 +35,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.pdf.semantic.domain.model.PdfDocument
 import com.pdf.semantic.domain.model.Slide
-import com.pdf.semantic.presentation.poc.ui.composable.LoadingIndicator
-import com.pdf.semantic.presentation.poc.ui.composable.PdfSlideInfo
-import com.pdf.semantic.presentation.poc.ui.composable.SearchBar
-import com.pdf.semantic.presentation.poc.ui.state.PocUiState
+import com.pdf.semantic.poc.ui.composable.LoadingIndicator
+import com.pdf.semantic.poc.ui.composable.PdfSlideInfo
+import com.pdf.semantic.poc.ui.composable.SearchBar
+import com.pdf.semantic.poc.ui.state.PocUiState
 
 @Composable
 fun PocScreen(pocViewModel: PocViewModel = viewModel()) {

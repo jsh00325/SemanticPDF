@@ -17,7 +17,9 @@ import com.pdf.semantic.presentation.globalsearch.GlobalSearchScreen
 import com.pdf.semantic.presentation.pdflist.PdfListScreen
 import com.pdf.semantic.presentation.pdfreader.PdfReaderScreen
 import com.pdf.semantic.presentation.theme.SemanticPDFTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class SemanticPDFActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

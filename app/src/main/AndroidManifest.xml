@@ -13,6 +13,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SemanticPDF">
         <activity
+            android:name=".presentation.MainActivity"
+            android:exported="false"
+            android:label="@string/title_activity_main"
+            android:theme="@style/Theme.SemanticPDF" />
+        <activity
             android:name=".poc.PocActivity"
             android:exported="true"
             android:label="@string/title_activity_poc"

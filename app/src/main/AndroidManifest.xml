@@ -13,21 +13,22 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SemanticPDF">
         <activity
-            android:name=".presentation.MainActivity"
-            android:exported="false"
-            android:label="@string/title_activity_main"
-            android:theme="@style/Theme.SemanticPDF" />
-        <activity
-            android:name=".poc.PocActivity"
+            android:name=".presentation.SemanticPDFActivity"
             android:exported="true"
-            android:label="@string/title_activity_poc"
+            android:label="@string/title_activity_semanticPdf"
             android:theme="@style/Theme.SemanticPDF">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".poc.PocActivity"
+            android:exported="false"
+            android:label="@string/title_activity_poc"
+            android:theme="@style/Theme.SemanticPDF" />
     </application>
 
 </manifest>

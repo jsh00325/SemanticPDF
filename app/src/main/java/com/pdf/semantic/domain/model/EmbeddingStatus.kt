@@ -4,5 +4,5 @@ enum class EmbeddingStatus {
     PENDING,
     IN_PROGRESS,
     COMPLETE,
-    FAIL
+    FAIL,
 }

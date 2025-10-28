@@ -8,5 +8,5 @@ data class PdfItem(
     val createdTime: Date,
     val status: EmbeddingStatus,
     val totalPages: Int,
-    val progressedPages: Int
+    val progressedPages: Int,
 )

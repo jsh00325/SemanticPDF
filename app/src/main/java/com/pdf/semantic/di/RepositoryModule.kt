@@ -20,24 +20,24 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindEmbeddingRepository(
-        embeddingRepositoryImpl: EmbeddingRepositoryImpl
+        embeddingRepositoryImpl: EmbeddingRepositoryImpl,
     ): EmbeddingRepository
 
     @Binds
     @Singleton
     abstract fun bindPdfFileRepository(
-        pdfFileRepositoryImpl: PdfFileRepositoryImpl
+        pdfFileRepositoryImpl: PdfFileRepositoryImpl,
     ): PdfFileRepository
 
     @Binds
     @Singleton
     abstract fun bindPdfMetadataRepository(
-        pdfMetadataRepositoryImpl: PdfMetadataRepositoryImpl
+        pdfMetadataRepositoryImpl: PdfMetadataRepositoryImpl,
     ): PdfMetadataRepository
 
     @Binds
     @Singleton
     abstract fun bindVectorSearchRepository(
-        vectorSearchRepositoryImpl: VectorSearchRepositoryImpl
+        vectorSearchRepositoryImpl: VectorSearchRepositoryImpl,
     ): VectorSearchRepository
 }

@@ -4,7 +4,7 @@ import android.content.Context
 import android.net.Uri
 import com.pdf.semantic.domain.model.PdfDocument
 import com.pdf.semantic.domain.model.Slide
-import com.pdf.semantic.domain.repository.PdfRepository
+import com.pdf.semantic.domain.repository.PdfFileRepository
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
 import com.tom_roush.pdfbox.pdmodel.PDDocument
 import com.tom_roush.pdfbox.text.PDFTextStripper
@@ -15,11 +15,11 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class PdfRepositoryImpl
+class PdfFileRepositoryImpl
     @Inject
     constructor(
         @ApplicationContext private val context: Context,
-    ) : PdfRepository {
+    ) : PdfFileRepository {
         init {
             PDFBoxResourceLoader.init(context)
         }

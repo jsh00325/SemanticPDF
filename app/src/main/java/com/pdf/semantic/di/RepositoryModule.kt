@@ -1,9 +1,9 @@
 package com.pdf.semantic.di
 
 import com.pdf.semantic.data.repositoryImpl.EmbeddingRepositoryImpl
-import com.pdf.semantic.data.repositoryImpl.PdfRepositoryImpl
+import com.pdf.semantic.data.repositoryImpl.PdfFileRepositoryImpl
 import com.pdf.semantic.domain.repository.EmbeddingRepository
-import com.pdf.semantic.domain.repository.PdfRepository
+import com.pdf.semantic.domain.repository.PdfFileRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -15,7 +15,7 @@ import javax.inject.Singleton
 abstract class RepositoryModule {
     @Binds
     @Singleton
-    abstract fun bindPdfRepository(pdfRepositoryImpl: PdfRepositoryImpl): PdfRepository
+    abstract fun bindPdfRepository(pdfRepositoryImpl: PdfFileRepositoryImpl): PdfFileRepository
 
     @Binds
     @Singleton

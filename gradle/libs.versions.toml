@@ -17,6 +17,7 @@ djl = "0.33.0"
 hiltNavigationCompose = "1.2.0"
 pdfboxAndroid = "2.0.27.0"
 lifecycleViewModelCompose = "2.6.1"
+objectbox = "5.0.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -44,9 +45,6 @@ pdfbox-android = { group = "com.tom-roush", name = "pdfbox-android", version.ref
 
 # liteRT 라이브러리
 litert = { group = "com.google.ai.edge.litert", name = "litert", version.ref = "litert" }
-litert-support = { group = "com.google.ai.edge.litert", name = "litert-support", version.ref = "litert" }
-litert-gpu = { group = "com.google.ai.edge.litert", name = "litert-gpu", version.ref = "litert" }
-litert-gpu-api = { group = "com.google.ai.edge.litert", name = "litert-gpu-api", version.ref = "litert" }
 
 # djl 라이브러리
 djl-android-core = { group = "ai.djl.android", name = "core", version.ref = "djl" }
@@ -55,6 +53,9 @@ djl-android-pytorch = { group = "ai.djl.android", name = "pytorch-native", versi
 djl-android-tokeninzer = { group = "ai.djl.android", name = "tokenizer-native", version.ref = "djl" }
 djl-huggingface-tokenizers = { group = "ai.djl.huggingface", name = "tokenizers", version.ref = "djl" }
 
+# objectbox gradle plugin 라이브러리
+objectbox-gradlePlugin = { module = "io.objectbox:objectbox-gradle-plugin", version.ref = "objectbox" }
+
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
@@ -62,3 +63,4 @@ kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "ko
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 kotlin-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+objectbox = { id = "io.objectbox" }

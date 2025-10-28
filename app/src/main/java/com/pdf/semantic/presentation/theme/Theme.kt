@@ -1,4 +1,4 @@
-package com.pdf.semantic.ui.theme
+package com.pdf.semantic.presentation.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme

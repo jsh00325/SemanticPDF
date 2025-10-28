@@ -1,4 +1,4 @@
-package com.pdf.semantic.ui.theme
+package com.pdf.semantic.presentation.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

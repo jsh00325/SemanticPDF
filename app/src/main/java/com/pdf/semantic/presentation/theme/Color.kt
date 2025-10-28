@@ -1,4 +1,4 @@
-package com.pdf.semantic.presentation.poc.ui.theme
+package com.pdf.semantic.presentation.theme
 
 import androidx.compose.ui.graphics.Color
 

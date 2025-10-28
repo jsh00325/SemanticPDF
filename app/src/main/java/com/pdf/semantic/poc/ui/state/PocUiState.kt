@@ -1,4 +1,4 @@
-package com.pdf.semantic.presentation.poc.ui.state
+package com.pdf.semantic.poc.ui.state
 
 import com.pdf.semantic.domain.model.PdfDocument
 import com.pdf.semantic.domain.model.Slide

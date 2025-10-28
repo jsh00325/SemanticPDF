@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">SemanticPDF</string>
     <string name="title_activity_poc">POC Activity</string>
+    <string name="title_activity_semanticPdf">SemanticPDF</string>
 </resources>

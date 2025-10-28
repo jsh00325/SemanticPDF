@@ -13,10 +13,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SemanticPDF">
         <activity
-            android:name=".presentation.poc.PocActivity"
+            android:name=".presentation.SemanticPDFActivity"
             android:exported="true"
-            android:label="@string/title_activity_poc"
+            android:label="@string/title_activity_semanticPdf"
             android:theme="@style/Theme.SemanticPDF">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -24,10 +25,10 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".MainActivity"
+            android:name=".poc.PocActivity"
             android:exported="false"
-            android:theme="@style/Theme.SemanticPDF"
-            tools:ignore="Instantiatable" />
+            android:label="@string/title_activity_poc"
+            android:theme="@style/Theme.SemanticPDF" />
     </application>
 
 </manifest>

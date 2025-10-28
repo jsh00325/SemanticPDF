@@ -15,7 +15,7 @@ import javax.inject.Singleton
 object DatabaseModule {
     @Provides
     @Singleton
-    fun provideDatabase(
+    fun provideBoxStore(
         @ApplicationContext context: Context,
     ): BoxStore = MyObjectBox.builder().androidContext(context).build()
 }

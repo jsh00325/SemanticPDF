@@ -6,6 +6,8 @@ import com.pdf.semantic.data.entity.PageEmbeddingEntity_
 import com.pdf.semantic.data.entity.PdfDocumentEntity
 import io.objectbox.BoxStore
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -76,4 +78,10 @@ class ObjectBoxDbDataSource
                 pageEmbeddingBox.remove(targetPdfDocument.pageEmbeddings)
                 pdfDocumentBox.remove(targetPdfDocument)
             }
+
+        fun observePdfDocumentById(pdfId: Long): Flow<PdfDocumentEntity> =
+            pdfDocumentBox.observeById(pdfId).filterNotNull()
+
+        fun observeAllPdfDocuments(): Flow<List<PdfDocumentEntity>> =
+            pdfDocumentBox.query().build().asFlow(pdfDocumentBox)
     }

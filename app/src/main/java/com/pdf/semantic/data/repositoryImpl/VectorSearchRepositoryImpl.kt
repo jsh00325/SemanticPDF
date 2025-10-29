@@ -1,6 +1,7 @@
 package com.pdf.semantic.data.repositoryImpl
 
 import com.pdf.semantic.data.datasource.ObjectBoxDbDataSource
+import com.pdf.semantic.data.entity.PageEmbeddingEntity
 import com.pdf.semantic.data.mapper.SearchResultMapper.toSearchResult
 import com.pdf.semantic.domain.model.SearchResult
 import com.pdf.semantic.domain.repository.VectorSearchRepository
@@ -41,10 +42,13 @@ class VectorSearchRepositoryImpl
             pageNumber: Int,
             embeddingVector: FloatArray,
         ) {
-            TODO("Not yet implemented")
-        }
-
-        override suspend fun deleteEmbeddingVector(pdfId: Long) {
-            TODO("Not yet implemented")
+            objectBoxDbDataSource.putPageEmbedding(
+                pdfId = pdfId,
+                pageEmbedding =
+                    PageEmbeddingEntity(
+                        pageNumber = pageNumber,
+                        embeddingVector = embeddingVector,
+                    ),
+            )
         }
     }

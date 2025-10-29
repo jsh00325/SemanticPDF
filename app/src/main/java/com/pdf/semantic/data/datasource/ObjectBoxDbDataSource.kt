@@ -5,8 +5,8 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class PageEmbeddingDbDataSource
+class ObjectBoxDbDataSource
     @Inject
     constructor(
-        private val boxStore: BoxStore,
+        boxStore: BoxStore,
     )

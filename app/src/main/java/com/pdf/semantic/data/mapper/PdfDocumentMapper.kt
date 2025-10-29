@@ -14,5 +14,5 @@ object PdfDocumentMapper {
             progressedPages = processedPages,
         )
 
-    fun List<PdfDocumentEntity>.toModels(): List<PdfItem> = this.map { it.toModel() }
+    fun List<PdfDocumentEntity>.toModels(): List<PdfItem> = map { it.toModel() }
 }

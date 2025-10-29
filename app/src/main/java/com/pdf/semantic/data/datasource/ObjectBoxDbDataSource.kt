@@ -1,5 +1,6 @@
 package com.pdf.semantic.data.datasource
 
+import com.pdf.semantic.data.dto.PageEmbeddingSearchResult
 import com.pdf.semantic.data.entity.PageEmbeddingEntity
 import com.pdf.semantic.data.entity.PageEmbeddingEntity_
 import com.pdf.semantic.data.entity.PdfDocumentEntity
@@ -47,7 +48,7 @@ class ObjectBoxDbDataSource
         suspend fun searchSimilarityPageEmbedding(
             queryVector: FloatArray,
             topK: Int = 100,
-        ): List<PageEmbeddingEntity> =
+        ): List<PageEmbeddingSearchResult> =
             withContext(Dispatchers.IO) {
                 val query =
                     pageEmbeddingBox
@@ -58,10 +59,15 @@ class ObjectBoxDbDataSource
                             ),
                         ).build()
 
-                val results = query.find()
+                val results = query.findWithScores()
                 query.close()
 
-                results
+                results.map {
+                    PageEmbeddingSearchResult(
+                        entity = it.get(),
+                        score = it.score,
+                    )
+                }
             }
 
         suspend fun deletePdfDocument(pdfId: Long) =

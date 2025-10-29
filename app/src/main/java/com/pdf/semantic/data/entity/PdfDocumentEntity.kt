@@ -13,7 +13,7 @@ import java.util.Date
 data class PdfDocumentEntity(
     @Id
     var id: Long = 0,
-    var originFileName: String = "",
+    var title: String = "",
     var internalFilePath: String = "",
     var totalPages: Int = 0,
     var processedPages: Int = 0,
@@ -22,6 +22,6 @@ data class PdfDocumentEntity(
     @Convert(converter = EmbeddingStatusConverter::class, dbType = Int::class)
     var embeddingStatus: EmbeddingStatus = EmbeddingStatus.PENDING,
 ) {
-    @Backlink(to = "pdfDocumentEntity")
+    @Backlink(to = "pdfDocument")
     lateinit var pageEmbeddings: ToMany<PageEmbeddingEntity>
 }

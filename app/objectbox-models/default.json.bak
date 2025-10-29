@@ -39,7 +39,7 @@
     },
     {
       "id": "2:6317798375840237445",
-      "lastPropertyId": "9:6177685328335725823",
+      "lastPropertyId": "8:6617923309468351822",
       "name": "PdfDocumentEntity",
       "properties": [
         {
@@ -47,6 +47,11 @@
           "name": "id",
           "type": 6,
           "flags": 1
+        },
+        {
+          "id": "2:4623713827244533823",
+          "name": "originFileName",
+          "type": 9
         },
         {
           "id": "3:3997848508019101600",
@@ -77,11 +82,6 @@
           "id": "8:6617923309468351822",
           "name": "embeddingStatus",
           "type": 5
-        },
-        {
-          "id": "9:6177685328335725823",
-          "name": "title",
-          "type": 9
         }
       ],
       "relations": []
@@ -95,9 +95,7 @@
   "modelVersionParserMinimum": 5,
   "retiredEntityUids": [],
   "retiredIndexUids": [],
-  "retiredPropertyUids": [
-    4623713827244533823
-  ],
+  "retiredPropertyUids": [],
   "retiredRelationUids": [],
   "version": 1
 }

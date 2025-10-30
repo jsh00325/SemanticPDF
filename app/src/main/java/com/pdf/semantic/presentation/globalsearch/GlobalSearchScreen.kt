@@ -8,9 +8,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
-fun GlobalSearchScreen(onBackClick: () -> Unit) {
+fun GlobalSearchScreen(
+    onBackClick: () -> Unit,
+    viewModel: GlobalSearchViewModel = viewModel(),
+) {
     // TODO: 추후 구현 예정
     Box(
         modifier = Modifier.fillMaxSize(),

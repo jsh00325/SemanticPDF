@@ -8,11 +8,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun PdfReaderScreen(
     pdfId: Long? = null,
     onBackClick: () -> Unit,
+    viewModel: PdfReaderViewModel = viewModel(),
 ) {
     // TODO: 추후 구현 예정
     Box(

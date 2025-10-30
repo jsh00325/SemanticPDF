@@ -51,4 +51,8 @@ class VectorSearchRepositoryImpl
                     ),
             )
         }
+
+        override suspend fun expandQuery(query: String): String {
+            TODO("Not yet implemented")
+        }
     }

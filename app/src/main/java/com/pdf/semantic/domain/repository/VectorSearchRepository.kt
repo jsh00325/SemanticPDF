@@ -20,6 +20,4 @@ interface VectorSearchRepository {
         pageNumber: Int,
         embeddingVector: FloatArray,
     )
-
-    suspend fun deleteEmbeddingVector(pdfId: Long)
 }

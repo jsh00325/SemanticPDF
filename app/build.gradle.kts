@@ -87,6 +87,7 @@ dependencies {
     implementation(libs.djl.huggingface.tokenizers)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.ai)
+    implementation(libs.firebase.appcheck)
     ksp(libs.hilt.android.compiler)
     ksp(libs.room.compiler)
     testImplementation(libs.junit)

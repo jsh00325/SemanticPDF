@@ -61,6 +61,7 @@ objectbox-gradlePlugin = { module = "io.objectbox:objectbox-gradle-plugin", vers
 # firebase ai login 관련 라이브러리
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
 firebase-ai = { group = "com.google.firebase", name = "firebase-ai" }
+firebase-appcheck = { group = "com.google.firebase", name = "firebase-appcheck-playintegrity" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

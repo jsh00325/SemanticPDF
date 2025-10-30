@@ -1,7 +1,6 @@
 package com.pdf.semantic.presentation
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -9,38 +8,24 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.pdf.semantic.data.datasource.LlmDataSource
 import com.pdf.semantic.presentation.globalsearch.GlobalSearchScreen
 import com.pdf.semantic.presentation.pdflist.PdfListScreen
 import com.pdf.semantic.presentation.pdfreader.PdfReaderScreen
 import com.pdf.semantic.presentation.theme.SemanticPDFTheme
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class SemanticPDFActivity : ComponentActivity() {
-    @Inject
-    lateinit var llmDataSource: LlmDataSource
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             SemanticPDFApp()
-        }
-
-        lifecycleScope.launch {
-            val query = "삼성 갤럭시 스마트폰의 소프트웨어 기반"
-            Log.d("EXPAND_TEST", "Query: $query")
-            val expandedQuery = llmDataSource.expandQueryForRetrieval(query)
-            Log.d("EXPAND_TEST", "Expanded Query: $expandedQuery")
         }
     }
 }

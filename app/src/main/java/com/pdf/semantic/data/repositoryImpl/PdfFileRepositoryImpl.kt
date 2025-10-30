@@ -24,30 +24,46 @@ class PdfFileRepositoryImpl
             PDFBoxResourceLoader.init(context)
         }
 
-        override suspend fun parsePdf(uri: Uri): PdfDocument =
-            withContext(Dispatchers.IO) {
-                val slides = mutableListOf<Slide>()
+    override suspend fun parsePdf(uri: Uri): PdfDocument =
+        withContext(Dispatchers.IO) {
+            val slides = mutableListOf<Slide>()
 
-                context.contentResolver.openInputStream(uri)?.use { inputStream ->
-                    val document = PDDocument.load(inputStream)
-                    val pdfStripper = PDFTextStripper()
+            val paragraphRegex = "\n{2,}".toRegex()
+            val paragraphPlaceholder = "__PARAGRAPH_BREAK__"
 
-                    for (page in 1..document.numberOfPages) {
-                        pdfStripper.startPage = page
-                        pdfStripper.endPage = page
-                        val text = pdfStripper.getText(document)
+            context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                val document = PDDocument.load(inputStream)
+                val pdfStripper = PDFTextStripper()
 
-                        slides.add(
-                            Slide(
-                                slideNumber = page,
-                                content = text.trim(),
-                                similarity = null,
-                            ),
-                        )
-                    }
-                    document.close()
-                } ?: throw IllegalStateException("Uri로부터 InputStream을 열 수 없습니다: $uri")
+                for (page in 1..document.numberOfPages) {
+                    pdfStripper.startPage = page
+                    pdfStripper.endPage = page
 
-                PdfDocument(uri = uri, slides = slides)
-            }
+                    val rawText = pdfStripper.getText(document)
+                    val textStep1 = rawText.replace("-\n", "")
+                    val textStep2 = textStep1.replace(paragraphRegex, paragraphPlaceholder)
+                    val textStep3 = textStep2.replace("\n", " ")
+                    val finalContent = textStep3.replace(paragraphPlaceholder, "\n")
+
+                    slides.add(
+                        Slide(
+                            slideNumber = page,
+                            content = finalContent.trim(),
+                            similarity = null,
+                        ),
+                    )
+                }
+                document.close()
+            } ?: throw IllegalStateException("Uri로부터 InputStream을 열 수 없습니다: $uri")
+
+            PdfDocument(uri = uri, slides = slides)
+        }
+
+    override suspend fun savePdfFile(uri: Uri): String {
+        TODO("Not yet implemented")
     }
+
+    override suspend fun deletePdfFile(internalPath: String) {
+        TODO("Not yet implemented")
+    }
+}

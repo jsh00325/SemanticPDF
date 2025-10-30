@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.spotless)
     alias(libs.plugins.objectbox)
+    alias(libs.plugins.firebase)
 }
 
 android {
@@ -84,6 +85,8 @@ dependencies {
     runtimeOnly(libs.djl.android.pytorch)
     runtimeOnly(libs.djl.android.tokeninzer)
     implementation(libs.djl.huggingface.tokenizers)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.ai)
     ksp(libs.hilt.android.compiler)
     ksp(libs.room.compiler)
     testImplementation(libs.junit)

@@ -55,12 +55,12 @@ class PdfMetadataRepositoryImpl
             objectBoxDbDataSource.putPdfDocument(pdfDocument)
         }
 
-        override suspend fun observeAllPdfMetadata(): Flow<List<PdfItem>> =
+        override fun observeAllPdfMetadata(): Flow<List<PdfItem>> =
             objectBoxDbDataSource.observeAllPdfDocuments().map { entityList ->
                 entityList.toModels()
             }
 
-        override suspend fun observePdfMetadata(pdfId: Long): Flow<PdfItem> =
+        override fun observePdfMetadata(pdfId: Long): Flow<PdfItem> =
             objectBoxDbDataSource.observePdfDocumentById(pdfId).map { entity ->
                 entity.toModel()
             }

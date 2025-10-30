@@ -20,4 +20,6 @@ interface VectorSearchRepository {
         pageNumber: Int,
         embeddingVector: FloatArray,
     )
+
+    suspend fun expandQuery(query: String): String
 }

@@ -1,5 +1,6 @@
 package com.pdf.semantic.data.repositoryImpl
 
+import com.pdf.semantic.data.datasource.LlmDataSource
 import com.pdf.semantic.data.datasource.ObjectBoxDbDataSource
 import com.pdf.semantic.data.entity.PageEmbeddingEntity
 import com.pdf.semantic.data.mapper.SearchResultMapper.toSearchResult
@@ -11,6 +12,7 @@ class VectorSearchRepositoryImpl
     @Inject
     constructor(
         private val objectBoxDbDataSource: ObjectBoxDbDataSource,
+        private val llmDataSource: LlmDataSource,
     ) : VectorSearchRepository {
         private suspend fun searchSimilaritySlides(
             queryVector: FloatArray,
@@ -51,4 +53,7 @@ class VectorSearchRepositoryImpl
                     ),
             )
         }
+
+        override suspend fun expandQuery(query: String): String =
+            llmDataSource.expandQueryForRetrieval(query)
     }

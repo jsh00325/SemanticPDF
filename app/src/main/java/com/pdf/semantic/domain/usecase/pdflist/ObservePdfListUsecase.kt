@@ -8,7 +8,7 @@ import javax.inject.Inject
 class ObservePdfListUsecase
     @Inject
     constructor(
-        private val pdfMetadataRepository: PdfMetadataRepository,
+        val pdfMetadataRepository: PdfMetadataRepository,
     ) {
-        suspend operator fun invoke(): Flow<List<PdfItem>> = pdfMetadataRepository.observeAllPdfMetadata()
+        operator fun invoke(): Flow<List<PdfItem>> = pdfMetadataRepository.observeAllPdfMetadata()
     }

@@ -28,6 +28,9 @@ class PdfMetadataRepositoryImpl
         override suspend fun getPdfInternalPath(pdfId: Long): String =
             objectBoxDbDataSource.getPdfDocumentById(pdfId).internalFilePath
 
+        override suspend fun getPdfMetadata(pdfId: Long): PdfItem =
+            objectBoxDbDataSource.getPdfDocumentById(pdfId).toModel()
+
         override suspend fun insertPdfMetadata(
             fileName: String,
             internalPath: String,

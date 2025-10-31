@@ -2,6 +2,8 @@ package com.pdf.semantic.presentation.globalsearch
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.pdf.semantic.domain.model.GlobalSearchResult
+import com.pdf.semantic.domain.usecase.globalsearch.SearchGlobalUsecase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -11,12 +13,14 @@ import javax.inject.Inject
 @HiltViewModel
 class GlobalSearchViewModel
     @Inject
-    constructor() : ViewModel() {
+    constructor(
+        private val searchGlobal: SearchGlobalUsecase,
+    ) : ViewModel() {
         private val _searchQuery = MutableStateFlow("")
         val searchQuery = _searchQuery.asStateFlow()
 
         // TODO: 추후 여러 UI 상태를 표현할 수 있도록 UiState 구현해서 교체
-        private val _searchResults = MutableStateFlow<List<String>>(emptyList())
+        private val _searchResults = MutableStateFlow<List<GlobalSearchResult>>(emptyList())
         val searchResults = _searchResults.asStateFlow()
 
         fun onSearchQueryChanged(query: String) {
@@ -31,13 +35,7 @@ class GlobalSearchViewModel
                     return@launch
                 }
 
-                // TODO: 추후 UseCase 구현 후 로직 수정
-                _searchResults.value =
-                    listOf(
-                        "Result 1 for '${_searchQuery.value}'",
-                        "Result 2 for '${_searchQuery.value}'",
-                        "Result 3 for '${_searchQuery.value}'",
-                    )
+                _searchResults.value = searchGlobal(_searchQuery.value, true)
             }
         }
     }

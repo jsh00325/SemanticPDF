@@ -23,12 +23,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.pdf.semantic.presentation.components.GlobalSearchItem
 
 @Composable
 fun GlobalSearchScreen(
     onBackClick: () -> Unit,
-    viewModel: GlobalSearchViewModel = viewModel(),
+    viewModel: GlobalSearchViewModel = hiltViewModel(),
 ) {
     val searchQuery by viewModel.searchQuery.collectAsState()
     val searchResults by viewModel.searchResults.collectAsState()
@@ -74,7 +75,10 @@ fun GlobalSearchScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             items(searchResults) { result ->
-                Text(text = result)
+                GlobalSearchItem(
+                    onItemClick = { /* TODO: 클릭 시 상세 페이지로 이동 */ },
+                    globalSearchResult = result,
+                )
             }
         }
     }

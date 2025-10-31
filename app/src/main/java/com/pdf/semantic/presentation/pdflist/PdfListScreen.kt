@@ -73,6 +73,7 @@ fun PdfListScreen(
             items(pdfList, key = { it.id }) { item ->
                 PdfListItem(
                     onItemClick = { onPdfClick(item.id) },
+                    onItemDelete = { viewModel.onPdfDeleted(item.id) },
                     pdfItem = item,
                 )
             }

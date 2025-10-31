@@ -22,7 +22,7 @@ interface PdfMetadataRepository {
         status: EmbeddingStatus,
     )
 
-    suspend fun observeAllPdfMetadata(): Flow<List<PdfItem>>
+    fun observeAllPdfMetadata(): Flow<List<PdfItem>>
 
-    suspend fun observePdfMetadata(pdfId: Long): Flow<PdfItem>
+    fun observePdfMetadata(pdfId: Long): Flow<PdfItem>
 }

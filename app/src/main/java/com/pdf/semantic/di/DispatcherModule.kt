@@ -16,5 +16,5 @@ object DispatcherModule {
     @Provides
     @Singleton
     @ModelDispatcher
-    fun provideIoDispatcher(): CoroutineDispatcher = Dispatchers.IO.limitedParallelism(1)
+    fun provideModelDispatcher(): CoroutineDispatcher = Dispatchers.IO.limitedParallelism(1)
 }

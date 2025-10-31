@@ -5,6 +5,8 @@ plugins {
     alias(libs.plugins.kotlin.ksp)
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.spotless)
+    alias(libs.plugins.objectbox)
+    alias(libs.plugins.firebase)
 }
 
 android {
@@ -77,18 +79,14 @@ dependencies {
     implementation(libs.hilt.navigation.compose)
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
-
     implementation(libs.litert)
-//    implementation(libs.litert.support)
-//    implementation(libs.litert.gpu)
-//    implementation(libs.litert.gpu.api)
-
     implementation(libs.djl.android.core)
     runtimeOnly(libs.djl.pytorch.engine)
     runtimeOnly(libs.djl.android.pytorch)
     runtimeOnly(libs.djl.android.tokeninzer)
     implementation(libs.djl.huggingface.tokenizers)
-
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.ai)
     ksp(libs.hilt.android.compiler)
     ksp(libs.room.compiler)
     testImplementation(libs.junit)

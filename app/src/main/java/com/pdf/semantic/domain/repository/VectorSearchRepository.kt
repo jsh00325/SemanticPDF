@@ -21,5 +21,5 @@ interface VectorSearchRepository {
         embeddingVector: FloatArray,
     )
 
-    suspend fun deleteEmbeddingVector(pdfId: Long)
+    suspend fun expandQuery(query: String): String
 }

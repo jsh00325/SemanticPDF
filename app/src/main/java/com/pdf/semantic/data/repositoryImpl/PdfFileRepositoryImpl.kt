@@ -2,6 +2,7 @@ package com.pdf.semantic.data.repositoryImpl
 
 import android.content.Context
 import android.net.Uri
+import android.provider.OpenableColumns
 import com.pdf.semantic.domain.model.PdfDocument
 import com.pdf.semantic.domain.model.Slide
 import com.pdf.semantic.domain.repository.PdfFileRepository
@@ -55,8 +56,8 @@ class PdfFileRepositoryImpl
                 }
                 document.close()
             } ?: throw IllegalStateException("Uri로부터 InputStream을 열 수 없습니다: $uri")
-
-            PdfDocument(uri = uri, slides = slides)
+            val title = getFileName(uri)
+            PdfDocument(uri = uri, title = title, slides = slides)
         }
 
     override suspend fun savePdfFile(uri: Uri): String {
@@ -65,5 +66,28 @@ class PdfFileRepositoryImpl
 
     override suspend fun deletePdfFile(internalPath: String) {
         TODO("Not yet implemented")
+    }
+
+    private fun getFileName(uri: Uri): String {
+        var result: String? = null
+        if (uri.scheme == "content") {
+            context.contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)
+                ?.use { cursor ->
+                    if (cursor.moveToFirst()) {
+                        val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                        if (nameIndex >= 0) {
+                            result = cursor.getString(nameIndex)
+                        }
+                    }
+                }
+        }
+        if (result == null) {
+            result = uri.path
+            val cut = result?.lastIndexOf('/')
+            if (cut != -1 && cut != null) {
+                result = result?.substring(cut + 1)
+            }
+        }
+        return result ?: "Unknown Title"
     }
 }

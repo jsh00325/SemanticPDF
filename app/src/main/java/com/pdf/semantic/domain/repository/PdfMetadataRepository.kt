@@ -9,6 +9,8 @@ interface PdfMetadataRepository {
 
     suspend fun getPdfInternalPath(pdfId: Long): String
 
+    suspend fun getPdfMetadata(pdfId: Long): PdfItem
+
     suspend fun insertPdfMetadata(
         fileName: String,
         internalPath: String,

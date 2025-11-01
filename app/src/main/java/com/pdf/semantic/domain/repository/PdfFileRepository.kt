@@ -1,15 +1,14 @@
 package com.pdf.semantic.domain.repository
 
-import android.net.Uri
 import com.pdf.semantic.domain.model.PdfDocument
 import com.pdf.semantic.domain.model.PdfInfo
 
 interface PdfFileRepository {
-    suspend fun parsePdf(uri: Uri): PdfDocument
+    suspend fun parsePdf(uriString: String): PdfDocument
 
-    suspend fun getPdfDetail(uri: Uri): PdfInfo
+    suspend fun getPdfDetail(uriString: String): PdfInfo
 
-    suspend fun savePdfFile(uri: Uri): String
+    suspend fun savePdfFile(uriString: String): String
 
     suspend fun deletePdfFile(internalPath: String)
 }

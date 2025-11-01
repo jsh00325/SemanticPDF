@@ -13,6 +13,9 @@ import com.tom_roush.pdfbox.text.PDFTextStripper
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.FileOutputStream
+import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -61,9 +64,23 @@ class PdfFileRepositoryImpl
                 PdfDocument(uri = uri, title = title, slides = slides)
             }
 
-        override suspend fun savePdfFile(uri: Uri): String {
-            TODO("Not yet implemented")
-        }
+        override suspend fun savePdfFile(uri: Uri): String =
+            withContext(Dispatchers.IO) {
+                val internalDir = context.filesDir
+
+                val uniqueFileName = "${UUID.randomUUID()}.pdf"
+
+                val destinationFile = File(internalDir, uniqueFileName)
+
+                context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                    FileOutputStream(destinationFile).use { outputStream ->
+
+                        inputStream.copyTo(outputStream)
+                    }
+                } ?: throw IllegalStateException("Uri로부터 InputStream을 열 수 없습니다: $uri")
+
+                destinationFile.absolutePath
+            }
 
         override suspend fun deletePdfFile(internalPath: String) {
             TODO("Not yet implemented")

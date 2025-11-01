@@ -17,7 +17,7 @@ data class PdfDocumentEntity(
     var internalFilePath: String = "",
     var totalPages: Int = 0,
     var processedPages: Int = 0,
-    var thumbnail: String? = null,
+    var thumbnail: String = "",
     var createdAt: Date = Date(),
     @Convert(converter = EmbeddingStatusConverter::class, dbType = Int::class)
     var embeddingStatus: EmbeddingStatus = EmbeddingStatus.PENDING,

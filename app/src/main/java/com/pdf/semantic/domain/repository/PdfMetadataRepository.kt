@@ -15,6 +15,7 @@ interface PdfMetadataRepository {
         fileName: String,
         internalPath: String,
         totalPages: Int,
+        thumbnailPath: String,
     ): Long
 
     suspend fun deletePdfMetadata(pdfId: Long)

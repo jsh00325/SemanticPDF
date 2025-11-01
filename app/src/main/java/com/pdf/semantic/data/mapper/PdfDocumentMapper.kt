@@ -12,6 +12,7 @@ object PdfDocumentMapper {
             status = embeddingStatus,
             totalPages = totalPages,
             progressedPages = processedPages,
+            thumbnailPath = thumbnail,
         )
 
     fun List<PdfDocumentEntity>.toModels(): List<PdfItem> = map { it.toModel() }

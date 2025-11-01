@@ -35,6 +35,7 @@ class PdfMetadataRepositoryImpl
             fileName: String,
             internalPath: String,
             totalPages: Int,
+            thumbnailPath: String,
         ): Long =
             objectBoxDbDataSource.putPdfDocument(
                 PdfDocumentEntity(
@@ -42,6 +43,7 @@ class PdfMetadataRepositoryImpl
                     internalFilePath = internalPath,
                     totalPages = totalPages,
                     createdAt = Date(),
+                    thumbnail = thumbnailPath,
                 ),
             )
 

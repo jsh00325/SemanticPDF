@@ -31,7 +31,7 @@ class PdfListViewModel
 
         fun onPdfAdded(uri: Uri) {
             viewModelScope.launch {
-                addPdf(uri)
+                addPdf(uri.toString())
             }
         }
 

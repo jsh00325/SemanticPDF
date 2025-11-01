@@ -12,7 +12,7 @@ class ParsePdfUseCase
     ) {
         suspend operator fun invoke(uri: Uri): Result<PdfDocument> =
             try {
-                val document = repository.parsePdf(uri)
+                val document = repository.parsePdf(uri.toString())
                 Result.success(document)
             } catch (e: Exception) {
                 e.printStackTrace()

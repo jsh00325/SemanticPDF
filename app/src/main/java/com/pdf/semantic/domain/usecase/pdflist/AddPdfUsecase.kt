@@ -1,6 +1,5 @@
 package com.pdf.semantic.domain.usecase.pdflist
 
-import android.net.Uri
 import com.pdf.semantic.domain.repository.PdfFileRepository
 import com.pdf.semantic.domain.repository.PdfMetadataRepository
 import javax.inject.Inject
@@ -11,17 +10,18 @@ class AddPdfUsecase
         private val pdfFileRepository: PdfFileRepository,
         private val pdfMetadataRepository: PdfMetadataRepository,
     ) {
-        suspend operator fun invoke(uri: Uri): Result<Long> =
+        suspend operator fun invoke(uriString: String): Result<Long> =
             try {
-                val document = pdfFileRepository.parsePdf(uri)
+                val info = pdfFileRepository.getPdfDetail(uriString)
 
-                val internalPath = pdfFileRepository.savePdfFile(uri)
+                val internalPath = pdfFileRepository.savePdfFile(uriString)
 
                 val newPdfId =
                     pdfMetadataRepository.insertPdfMetadata(
-                        fileName = document.title,
+                        fileName = info.title,
                         internalPath = internalPath,
-                        totalPages = document.slides.size,
+                        totalPages = info.totalPages,
+                        thumbnailPath = info.thumbnailFilePath,
                     )
 
                 Result.success(newPdfId)

@@ -1,6 +1,7 @@
 package com.pdf.semantic.presentation.components
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,10 +30,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil3.compose.rememberAsyncImagePainter
+import coil3.request.ImageRequest
+import coil3.request.placeholder
 import com.pdf.semantic.R
 import com.pdf.semantic.domain.model.EmbeddingStatus
 import com.pdf.semantic.domain.model.PdfItem
@@ -67,6 +72,13 @@ fun PdfListItem(
         )
     }
 
+    val thumbnailPainter = rememberAsyncImagePainter(
+        model = ImageRequest.Builder(LocalContext.current)
+            .data(pdfItem.thumbnailPath)
+            .placeholder(R.drawable.placeholder)
+            .build()
+    )
+
     Card(
         modifier =
             modifier
@@ -87,15 +99,17 @@ fun PdfListItem(
         ) {
             // TODO: 추후 이미지 받아서 처리
             Box {
+
                 Image(
-                    painter = painterResource(id = R.drawable.ic_launcher_background),
+                    painter = thumbnailPainter,
                     contentDescription = "PDF Slide Image",
                     modifier =
                         Modifier
                             .fillMaxWidth()
                             .aspectRatio(1.41f)
-                            .clip(RoundedCornerShape(4.dp)),
-                    contentScale = ContentScale.Crop,
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(Color.LightGray),
+                    contentScale = ContentScale.Fit,
                 )
 
                 if (pdfItem.status == EmbeddingStatus.COMPLETE) {

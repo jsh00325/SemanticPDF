@@ -1,8 +1,11 @@
 package com.pdf.semantic.data.repositoryImpl
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.pdf.PdfRenderer
 import android.net.Uri
 import android.provider.OpenableColumns
+import androidx.core.graphics.createBitmap
 import com.pdf.semantic.domain.model.PdfDocument
 import com.pdf.semantic.domain.model.PdfInfo
 import com.pdf.semantic.domain.model.Slide
@@ -82,6 +85,20 @@ class PdfFileRepositoryImpl
                 destinationFile.absolutePath
             }
 
+        private suspend fun saveThumbnailImage(bitmap: Bitmap): String =
+            withContext(Dispatchers.IO) {
+                val internalDir = context.filesDir
+                val uniqueFileName = "${UUID.randomUUID()}.png"
+                val imageFile = File(internalDir, uniqueFileName)
+
+                FileOutputStream(imageFile).use { outputStream ->
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+                    outputStream.flush()
+                }
+
+                imageFile.absolutePath
+            }
+
         override suspend fun deletePdfFile(internalPath: String) {
             TODO("Not yet implemented")
         }
@@ -90,15 +107,25 @@ class PdfFileRepositoryImpl
             withContext(Dispatchers.IO) {
                 val title = getFileName(uri)
 
-                val totalPages =
-                    context.contentResolver.openInputStream(uri)?.use { inputStream ->
-                        val document = PDDocument.load(inputStream)
-                        val pages = document.numberOfPages
-                        document.close()
-                        pages
-                    } ?: throw IllegalStateException("Uri로부터 InputStream을 열 수 없습니다: $uri")
+                context.contentResolver.openFileDescriptor(uri, "r")?.use { fileDescriptor ->
+                    val pdfRenderer = PdfRenderer(fileDescriptor)
 
-                PdfInfo(title = title, totalPages = totalPages)
+                    val totalPages = pdfRenderer.pageCount
+                    val thumbnailPage = pdfRenderer.openPage(0)
+                    val thumbnailBitmap = createBitmap(thumbnailPage.width, thumbnailPage.height)
+                    thumbnailPage.render(thumbnailBitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
+
+                    thumbnailPage.close()
+                    pdfRenderer.close()
+
+                    val thumbnailFilePath = saveThumbnailImage(thumbnailBitmap)
+
+                    PdfInfo(
+                        title = title,
+                        totalPages = totalPages,
+                        thumbnailFilePath = thumbnailFilePath
+                    )
+                } ?: throw IllegalStateException("Uri로부터 FileDescriptor를 열 수 없습니다: $uri")
             }
 
         private fun getFileName(uri: Uri): String {

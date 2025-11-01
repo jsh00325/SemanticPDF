@@ -22,6 +22,7 @@ class AddPdfUsecase
                         fileName = info.title,
                         internalPath = internalPath,
                         totalPages = info.totalPages,
+                        thumbnailPath = info.thumbnailFilePath,
                     )
 
                 Result.success(newPdfId)

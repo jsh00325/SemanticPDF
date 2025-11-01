@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
 import com.pdf.semantic.domain.model.PdfDocument
+import com.pdf.semantic.domain.model.PdfInfo
 import com.pdf.semantic.domain.model.Slide
 import com.pdf.semantic.domain.repository.PdfFileRepository
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
@@ -67,6 +68,21 @@ class PdfFileRepositoryImpl
         override suspend fun deletePdfFile(internalPath: String) {
             TODO("Not yet implemented")
         }
+
+        override suspend fun getPdfDetail(uri: Uri): PdfInfo =
+            withContext(Dispatchers.IO) {
+                val title = getFileName(uri)
+
+                val totalPages =
+                    context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                        val document = PDDocument.load(inputStream)
+                        val pages = document.numberOfPages
+                        document.close()
+                        pages
+                    } ?: throw IllegalStateException("Uri로부터 InputStream을 열 수 없습니다: $uri")
+
+                PdfInfo(title = title, totalPages = totalPages)
+            }
 
         private fun getFileName(uri: Uri): String {
             var result: String? = null

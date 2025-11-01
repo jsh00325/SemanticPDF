@@ -13,15 +13,15 @@ class AddPdfUsecase
     ) {
         suspend operator fun invoke(uri: Uri): Result<Long> =
             try {
-                val document = pdfFileRepository.parsePdf(uri)
+                val info = pdfFileRepository.getPdfDetail(uri)
 
                 val internalPath = pdfFileRepository.savePdfFile(uri)
 
                 val newPdfId =
                     pdfMetadataRepository.insertPdfMetadata(
-                        fileName = document.title,
+                        fileName = info.title,
                         internalPath = internalPath,
-                        totalPages = document.slides.size,
+                        totalPages = info.totalPages,
                     )
 
                 Result.success(newPdfId)

@@ -24,7 +24,7 @@ import java.util.UUID
 class PdfFileDataSource
     @Inject
     constructor(
-        @ApplicationContext private val context: Context
+        @ApplicationContext private val context: Context,
     ) {
         private fun getFileName(uri: Uri): String {
             var result: String? = null
@@ -144,7 +144,11 @@ class PdfFileDataSource
                 destinationFile.absolutePath
             }
 
-        suspend fun deletePdfFile(internalPath: String) {
-            TODO("deletePdfFile 로직 구현")
-        }
+        suspend fun deletePdfFile(internalPath: String) =
+            withContext(Dispatchers.IO) {
+                val file = File(internalPath)
+                if (file.exists()) {
+                    file.delete()
+                }
+            }
     }

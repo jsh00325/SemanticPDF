@@ -9,5 +9,5 @@ data class PdfItem(
     val status: EmbeddingStatus,
     val totalPages: Int,
     val progressedPages: Int,
-    val thumbnailPath: String,
+    val thumbnailPath: String?,
 )

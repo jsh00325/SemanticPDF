@@ -31,7 +31,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -72,12 +71,15 @@ fun PdfListItem(
         )
     }
 
-    val thumbnailPainter = rememberAsyncImagePainter(
-        model = ImageRequest.Builder(LocalContext.current)
-            .data(pdfItem.thumbnailPath)
-            .placeholder(R.drawable.placeholder)
-            .build()
-    )
+    val thumbnailPainter =
+        rememberAsyncImagePainter(
+            model =
+                ImageRequest
+                    .Builder(LocalContext.current)
+                    .data(pdfItem.thumbnailPath)
+                    .placeholder(R.drawable.placeholder)
+                    .build(),
+        )
 
     Card(
         modifier =
@@ -99,7 +101,6 @@ fun PdfListItem(
         ) {
             // TODO: 추후 이미지 받아서 처리
             Box {
-
                 Image(
                     painter = thumbnailPainter,
                     contentDescription = "PDF Slide Image",

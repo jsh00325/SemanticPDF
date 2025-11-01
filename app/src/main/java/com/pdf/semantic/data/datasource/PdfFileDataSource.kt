@@ -6,6 +6,7 @@ import android.graphics.pdf.PdfRenderer
 import android.net.Uri
 import android.provider.OpenableColumns
 import androidx.core.graphics.createBitmap
+import androidx.core.net.toUri
 import com.pdf.semantic.domain.model.PdfDocument
 import com.pdf.semantic.domain.model.PdfInfo
 import com.pdf.semantic.domain.model.Slide
@@ -64,8 +65,9 @@ class PdfFileDataSource
                 imageFile.absolutePath
             }
 
-        suspend fun parsePdf(uri: Uri): PdfDocument =
+        suspend fun parsePdf(uriString: String): PdfDocument =
             withContext(Dispatchers.IO) {
+                val uri = uriString.toUri()
                 val slides = mutableListOf<Slide>()
 
                 val paragraphRegex = "\n{2,}".toRegex()
@@ -99,8 +101,9 @@ class PdfFileDataSource
                 PdfDocument(uri = uri, title = title, slides = slides)
             }
 
-        suspend fun getPdfDetail(uri: Uri): PdfInfo =
+        suspend fun getPdfDetail(uriString: String): PdfInfo =
             withContext(Dispatchers.IO) {
+                val uri = uriString.toUri()
                 val title = getFileName(uri)
 
                 context.contentResolver.openFileDescriptor(uri, "r")?.use { fileDescriptor ->
@@ -129,8 +132,10 @@ class PdfFileDataSource
                 } ?: throw IllegalStateException("Uri로부터 FileDescriptor를 열 수 없습니다: $uri")
             }
 
-        suspend fun savePdfFile(uri: Uri): String =
+        suspend fun savePdfFile(uriString: String): String =
             withContext(Dispatchers.IO) {
+                val uri = uriString.toUri()
+
                 val internalDir = context.filesDir
                 val uniqueFileName = "${UUID.randomUUID()}.pdf"
                 val destinationFile = File(internalDir, uniqueFileName)

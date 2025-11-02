@@ -51,15 +51,6 @@ class PdfMetadataRepositoryImpl
             objectBoxDbDataSource.deletePdfDocument(pdfId)
         }
 
-        override suspend fun updateEmbeddingStatus(
-            pdfId: Long,
-            status: EmbeddingStatus,
-        ) {
-            val pdfDocument = objectBoxDbDataSource.getPdfDocumentById(pdfId)
-            pdfDocument.embeddingStatus = status
-            objectBoxDbDataSource.putPdfDocument(pdfDocument)
-        }
-
         override fun observeAllPdfMetadata(): Flow<List<PdfItem>> =
             objectBoxDbDataSource.observeAllPdfDocuments().map { entityList ->
                 entityList.toModels()

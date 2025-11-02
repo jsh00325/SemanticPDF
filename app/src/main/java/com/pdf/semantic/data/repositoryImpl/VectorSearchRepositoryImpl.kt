@@ -39,21 +39,6 @@ class VectorSearchRepositoryImpl
             topK: Int,
         ): List<SearchResult> = searchSimilaritySlides(queryVector, listOf(pdfId), topK)
 
-        override suspend fun insertEmbeddingVector(
-            pdfId: Long,
-            pageNumber: Int,
-            embeddingVector: FloatArray,
-        ) {
-            objectBoxDbDataSource.putPageEmbedding(
-                pdfId = pdfId,
-                pageEmbedding =
-                    PageEmbeddingEntity(
-                        pageNumber = pageNumber,
-                        embeddingVector = embeddingVector,
-                    ),
-            )
-        }
-
         override suspend fun expandQuery(query: String): String =
             llmDataSource.expandQueryForRetrieval(query)
     }

@@ -7,4 +7,11 @@ interface EmbeddingRepository {
         title: String?,
         text: String,
     ): FloatArray
+
+    suspend fun scheduleEmbedding(
+        pdfId: Long,
+        pdfTitle: String,
+        internalPath: String,
+        totalPages: Int
+    )
 }

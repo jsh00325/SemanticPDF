@@ -20,11 +20,6 @@ interface PdfMetadataRepository {
 
     suspend fun deletePdfMetadata(pdfId: Long)
 
-    suspend fun updateEmbeddingStatus(
-        pdfId: Long,
-        status: EmbeddingStatus,
-    )
-
     fun observeAllPdfMetadata(): Flow<List<PdfItem>>
 
     fun observePdfMetadata(pdfId: Long): Flow<PdfItem>

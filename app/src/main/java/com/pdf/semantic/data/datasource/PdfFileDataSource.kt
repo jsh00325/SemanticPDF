@@ -41,7 +41,8 @@ class PdfFileDataSource
                     }
             }
 
-            return uri.path?.substringAfterLast('/')
+            return uri.path
+                ?.substringAfterLast('/')
                 ?.removeSuffix(".pdf")
                 ?: "Unknown Title"
         }
@@ -106,11 +107,12 @@ class PdfFileDataSource
 
                     val totalPages = pdfRenderer.pageCount
                     val thumbnailPage = pdfRenderer.openPage(0)
-                    val thumbnailBitmap = createBitmap(
-                        thumbnailPage.width,
-                        thumbnailPage.height,
-                        Bitmap.Config.ARGB_8888,
-                    )
+                    val thumbnailBitmap =
+                        createBitmap(
+                            thumbnailPage.width,
+                            thumbnailPage.height,
+                            Bitmap.Config.ARGB_8888,
+                        )
 
                     val canvas = android.graphics.Canvas(thumbnailBitmap)
                     canvas.drawColor(android.graphics.Color.WHITE)

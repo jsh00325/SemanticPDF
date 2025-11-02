@@ -97,6 +97,37 @@ class PdfFileDataSource
                 PdfDocument(uri = uri, title = title, slides = slides)
             }
 
+        suspend fun parsePdfByInternalPath(internalPath: String): List<Slide> =
+            withContext(Dispatchers.IO) {
+                val slides = mutableListOf<Slide>()
+
+                val file = File(internalPath)
+                val document = PDDocument.load(file)
+                val pdfStripper = PDFTextStripper()
+
+                for (page in 1..document.numberOfPages) {
+                    pdfStripper.startPage = page
+                    pdfStripper.endPage = page
+
+                    val rawText = pdfStripper.getText(document)
+                    val textStep1 = rawText.replace("-\n", "")
+                    val textStep2 = textStep1.replace(PARAGRAPH_REGEX, PARAGRAPH_PLACEHOLDER)
+                    val textStep3 = textStep2.replace("\n", " ")
+                    val finalContent = textStep3.replace(PARAGRAPH_PLACEHOLDER, "\n")
+
+                    slides.add(
+                        Slide(
+                            slideNumber = page,
+                            content = finalContent.trim(),
+                            similarity = null,
+                        ),
+                    )
+                }
+                document.close()
+
+                slides
+            }
+
         suspend fun getPdfDetail(uriString: String): PdfInfo =
             withContext(Dispatchers.IO) {
                 val uri = uriString.toUri()
@@ -162,4 +193,9 @@ class PdfFileDataSource
                     file.delete()
                 }
             }
+
+        companion object {
+            private val PARAGRAPH_REGEX = "\n{2,}".toRegex()
+            private const val PARAGRAPH_PLACEHOLDER = "__PARAGRAPH_BREAK__"
+        }
     }

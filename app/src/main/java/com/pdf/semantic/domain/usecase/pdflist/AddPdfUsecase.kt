@@ -1,5 +1,6 @@
 package com.pdf.semantic.domain.usecase.pdflist
 
+import com.pdf.semantic.domain.repository.EmbeddingRepository
 import com.pdf.semantic.domain.repository.PdfFileRepository
 import com.pdf.semantic.domain.repository.PdfMetadataRepository
 import javax.inject.Inject
@@ -9,6 +10,7 @@ class AddPdfUsecase
     constructor(
         private val pdfFileRepository: PdfFileRepository,
         private val pdfMetadataRepository: PdfMetadataRepository,
+        private val embeddingRepository: EmbeddingRepository,
     ) {
         suspend operator fun invoke(uriString: String): Result<Long> =
             try {
@@ -23,6 +25,13 @@ class AddPdfUsecase
                         totalPages = info.totalPages,
                         thumbnailPath = info.thumbnailFilePath,
                     )
+
+                embeddingRepository.scheduleEmbedding(
+                    pdfId = newPdfId,
+                    pdfTitle = info.title,
+                    internalPath = internalPath,
+                    totalPages = info.totalPages,
+                )
 
                 Result.success(newPdfId)
             } catch (e: Exception) {

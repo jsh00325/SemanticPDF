@@ -4,6 +4,7 @@ import com.pdf.semantic.data.dto.PageEmbeddingSearchResult
 import com.pdf.semantic.data.entity.PageEmbeddingEntity
 import com.pdf.semantic.data.entity.PageEmbeddingEntity_
 import com.pdf.semantic.data.entity.PdfDocumentEntity
+import com.pdf.semantic.domain.model.EmbeddingStatus
 import io.objectbox.BoxStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -71,6 +72,17 @@ class ObjectBoxDbDataSource
                     )
                 }
             }
+
+        suspend fun updatePdfStatus(
+            pdfId: Long,
+            newProcessedPages: Int,
+            newStatus: EmbeddingStatus,
+        ) = withContext(Dispatchers.IO) {
+            val targetPdfDocument = pdfDocumentBox.get(pdfId)
+            targetPdfDocument.processedPages = newProcessedPages
+            targetPdfDocument.embeddingStatus = newStatus
+            pdfDocumentBox.put(targetPdfDocument)
+        }
 
         suspend fun deletePdfDocument(pdfId: Long) =
             withContext(Dispatchers.IO) {

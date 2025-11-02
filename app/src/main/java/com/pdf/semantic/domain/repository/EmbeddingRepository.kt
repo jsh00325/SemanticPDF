@@ -12,6 +12,6 @@ interface EmbeddingRepository {
         pdfId: Long,
         pdfTitle: String,
         internalPath: String,
-        totalPages: Int
+        totalPages: Int,
     )
 }

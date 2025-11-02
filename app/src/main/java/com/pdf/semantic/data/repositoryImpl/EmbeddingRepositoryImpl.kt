@@ -3,7 +3,7 @@ package com.pdf.semantic.data.repositoryImpl
 import android.util.Log
 import androidx.work.Data
 import androidx.work.ExistingWorkPolicy
-import androidx.work.OneTimeWorkRequest
+import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkManager
 import com.pdf.semantic.data.datasource.EmbeddingDataSource
@@ -69,18 +69,20 @@ class EmbeddingRepositoryImpl
             internalPath: String,
             totalPages: Int,
         ) {
-            val inputData = Data.Builder()
-                .putLong(EmbedWorker.KEY_PDF_ID, pdfId)
-                .putString(EmbedWorker.KEY_TITLE, pdfTitle)
-                .putString(EmbedWorker.KEY_INTERNAL_PATH, internalPath)
-                .putInt(EmbedWorker.KEY_TOTAL_PAGES, totalPages)
-                .build()
+            val inputData =
+                Data
+                    .Builder()
+                    .putLong(EmbedWorker.KEY_PDF_ID, pdfId)
+                    .putString(EmbedWorker.KEY_TITLE, pdfTitle)
+                    .putString(EmbedWorker.KEY_INTERNAL_PATH, internalPath)
+                    .putInt(EmbedWorker.KEY_TOTAL_PAGES, totalPages)
+                    .build()
 
-            val embedWorkRequest = OneTimeWorkRequest
-                .Builder(EmbedWorker::class.java)
-                .setExpedited(OutOfQuotaPolicy.DROP_WORK_REQUEST)
-                .setInputData(inputData)
-                .build()
+            val embedWorkRequest =
+                OneTimeWorkRequestBuilder<EmbedWorker>()
+                    .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+                    .setInputData(inputData)
+                    .build()
 
             workManager.enqueueUniqueWork(
                 uniqueWorkName = "embedding-work",

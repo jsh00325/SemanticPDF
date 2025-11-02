@@ -1,6 +1,5 @@
 package com.pdf.semantic.domain.repository
 
-import com.pdf.semantic.domain.model.EmbeddingStatus
 import com.pdf.semantic.domain.model.PdfItem
 import kotlinx.coroutines.flow.Flow
 

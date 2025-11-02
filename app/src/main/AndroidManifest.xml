@@ -29,6 +29,12 @@
             android:exported="false"
             android:label="@string/title_activity_poc"
             android:theme="@style/Theme.SemanticPDF" />
+
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            tools:node="remove">
+        </provider>
     </application>
 
 </manifest>

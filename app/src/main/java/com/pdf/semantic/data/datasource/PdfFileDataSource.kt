@@ -28,7 +28,6 @@ class PdfFileDataSource
         @ApplicationContext private val context: Context,
     ) {
         private fun getFileName(uri: Uri): String {
-            var result: String? = null
             if (uri.scheme == "content") {
                 context.contentResolver
                     .query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)
@@ -36,29 +35,25 @@ class PdfFileDataSource
                         if (cursor.moveToFirst()) {
                             val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
                             if (nameIndex >= 0) {
-                                result = cursor.getString(nameIndex)
+                                return cursor.getString(nameIndex).removeSuffix(".pdf")
                             }
                         }
                     }
             }
-            if (result == null) {
-                result = uri.path
-                val cut = result?.lastIndexOf('/')
-                if (cut != -1 && cut != null) {
-                    result = result?.substring(cut + 1)
-                }
-            }
-            return result ?: "Unknown Title"
+
+            return uri.path?.substringAfterLast('/')
+                ?.removeSuffix(".pdf")
+                ?: "Unknown Title"
         }
 
         private suspend fun saveThumbnailImage(bitmap: Bitmap): String =
             withContext(Dispatchers.IO) {
                 val internalDir = context.filesDir
-                val uniqueFileName = "${UUID.randomUUID()}.png"
+                val uniqueFileName = "${UUID.randomUUID()}.jpeg"
                 val imageFile = File(internalDir, uniqueFileName)
 
                 FileOutputStream(imageFile).use { outputStream ->
-                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 90, outputStream)
                     outputStream.flush()
                 }
 
@@ -111,7 +106,16 @@ class PdfFileDataSource
 
                     val totalPages = pdfRenderer.pageCount
                     val thumbnailPage = pdfRenderer.openPage(0)
-                    val thumbnailBitmap = createBitmap(thumbnailPage.width, thumbnailPage.height)
+                    val thumbnailBitmap = createBitmap(
+                        thumbnailPage.width,
+                        thumbnailPage.height,
+                        Bitmap.Config.ARGB_8888,
+                    )
+
+                    val canvas = android.graphics.Canvas(thumbnailBitmap)
+                    canvas.drawColor(android.graphics.Color.WHITE)
+                    canvas.drawBitmap(thumbnailBitmap, 0f, 0f, null)
+
                     thumbnailPage.render(
                         thumbnailBitmap,
                         null,

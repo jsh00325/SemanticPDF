@@ -32,7 +32,6 @@ class EmbedWorker
         ): FloatArray {
             val input = "title: ${title ?: "\"none\""} | text: $text"
             val tokens = tokenizerDataSource.tokenize(input)
-            Log.d(TOKEN_COUNT_TAG, "Token count: ${tokens.size}")
             return embeddingDataSource.embed(tokens)
         }
 
@@ -104,7 +103,6 @@ class EmbedWorker
 
         companion object {
             private const val TAG = "EmbedWorker"
-            private const val TOKEN_COUNT_TAG = "TokenCount"
             private const val DEFAULT_PDF_ID = -1L
             private const val DEFAULT_INTERNAL_PATH = ""
             private const val DEFAULT_TOTAL_PAGES = -1

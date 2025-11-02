@@ -24,11 +24,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".poc.PocActivity"
-            android:exported="false"
-            android:label="@string/title_activity_poc"
-            android:theme="@style/Theme.SemanticPDF" />
 
         <provider
             android:name="androidx.startup.InitializationProvider"

@@ -61,42 +61,6 @@ class PdfFileDataSource
                 imageFile.absolutePath
             }
 
-        suspend fun parsePdf(uriString: String): PdfDocument =
-            withContext(Dispatchers.IO) {
-                val uri = uriString.toUri()
-                val slides = mutableListOf<Slide>()
-
-                val paragraphRegex = "\n{2,}".toRegex()
-                val paragraphPlaceholder = "__PARAGRAPH_BREAK__"
-
-                context.contentResolver.openInputStream(uri)?.use { inputStream ->
-                    val document = PDDocument.load(inputStream)
-                    val pdfStripper = PDFTextStripper()
-
-                    for (page in 1..document.numberOfPages) {
-                        pdfStripper.startPage = page
-                        pdfStripper.endPage = page
-
-                        val rawText = pdfStripper.getText(document)
-                        val textStep1 = rawText.replace("-\n", "")
-                        val textStep2 = textStep1.replace(paragraphRegex, paragraphPlaceholder)
-                        val textStep3 = textStep2.replace("\n", " ")
-                        val finalContent = textStep3.replace(paragraphPlaceholder, "\n")
-
-                        slides.add(
-                            Slide(
-                                slideNumber = page,
-                                content = finalContent.trim(),
-                                similarity = null,
-                            ),
-                        )
-                    }
-                    document.close()
-                } ?: throw IllegalStateException("Uri로부터 InputStream을 열 수 없습니다: $uri")
-                val title = getFileName(uri)
-                PdfDocument(uri = uri, title = title, slides = slides)
-            }
-
         suspend fun parsePdfByInternalPath(internalPath: String): List<Slide> =
             withContext(Dispatchers.IO) {
                 val slides = mutableListOf<Slide>()

@@ -11,9 +11,6 @@ class PdfFileRepositoryImpl
     constructor(
         private val dataSource: PdfFileDataSource,
     ) : PdfFileRepository {
-        override suspend fun parsePdf(uriString: String): PdfDocument =
-            dataSource.parsePdf(uriString)
-
         override suspend fun getPdfDetail(uriString: String): PdfInfo =
             dataSource.getPdfDetail(uriString)
 

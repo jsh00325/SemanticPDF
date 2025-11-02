@@ -1,7 +1,6 @@
 package com.pdf.semantic.data.repositoryImpl
 
 import com.pdf.semantic.data.datasource.PdfFileDataSource
-import com.pdf.semantic.domain.model.PdfDocument
 import com.pdf.semantic.domain.model.PdfInfo
 import com.pdf.semantic.domain.repository.PdfFileRepository
 import javax.inject.Inject

@@ -7,7 +7,6 @@ import android.net.Uri
 import android.provider.OpenableColumns
 import androidx.core.graphics.createBitmap
 import androidx.core.net.toUri
-import com.pdf.semantic.domain.model.PdfDocument
 import com.pdf.semantic.domain.model.PdfInfo
 import com.pdf.semantic.domain.model.Slide
 import com.tom_roush.pdfbox.pdmodel.PDDocument

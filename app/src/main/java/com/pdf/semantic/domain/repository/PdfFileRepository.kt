@@ -1,6 +1,5 @@
 package com.pdf.semantic.domain.repository
 
-import com.pdf.semantic.domain.model.PdfDocument
 import com.pdf.semantic.domain.model.PdfInfo
 
 interface PdfFileRepository {

@@ -89,6 +89,7 @@ dependencies {
     implementation(libs.firebase.ai)
     implementation(libs.coil)
     implementation(libs.work)
+    implementation(libs.hilt.work)
     ksp(libs.hilt.android.compiler)
     ksp(libs.room.compiler)
     testImplementation(libs.junit)

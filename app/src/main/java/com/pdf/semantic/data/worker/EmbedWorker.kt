@@ -14,6 +14,7 @@ import com.pdf.semantic.data.entity.PageEmbeddingEntity
 import com.pdf.semantic.domain.model.EmbeddingStatus
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import kotlin.coroutines.cancellation.CancellationException
 
 @HiltWorker
 class EmbedWorker
@@ -35,66 +36,97 @@ class EmbedWorker
             return embeddingDataSource.embed(tokens)
         }
 
-        override suspend fun doWork(): Result {
-            val pdfId = inputData.getLong(KEY_PDF_ID, DEFAULT_PDF_ID)
-            val title = inputData.getString(KEY_TITLE) ?: ""
-            val internalPath = inputData.getString(KEY_INTERNAL_PATH) ?: DEFAULT_INTERNAL_PATH
-            val totalPages = inputData.getInt(KEY_TOTAL_PAGES, DEFAULT_TOTAL_PAGES)
+        private suspend fun embedAndStorePdfPages(
+            pdfId: Long,
+            title: String,
+            internalPath: String,
+            totalPages: Int,
+        ) {
+            val currentPdfDocument = objectBoxDbDataSource.getPdfDocumentById(pdfId)
 
-            return try {
-                require(pdfId != DEFAULT_PDF_ID) { "Invalid pdfId" }
-                require(internalPath != DEFAULT_INTERNAL_PATH) { "Invalid internalPath" }
-                require(totalPages != DEFAULT_TOTAL_PAGES) { "Invalid totalPages" }
+            if (currentPdfDocument == null) {
+                Log.w(TAG, "PDF document with id $pdfId not found. Assuming deleted. Work stopped.")
+                return
+            }
+            if (currentPdfDocument.embeddingStatus == EmbeddingStatus.COMPLETE) {
+                Log.d(TAG, "Work for pdfId $pdfId already complete. Skipping.")
+                return
+            }
 
-                val parsedPdfSlides = pdfFileDataSource.parsePdfByInternalPath(internalPath)
+            val lastProcessedPage = currentPdfDocument.processedPages
 
+            if (currentPdfDocument.embeddingStatus == EmbeddingStatus.FAIL) {
                 objectBoxDbDataSource.updatePdfStatus(
                     pdfId = pdfId,
-                    newProcessedPages = 0,
+                    newProcessedPages = lastProcessedPage,
                     newStatus = EmbeddingStatus.IN_PROGRESS,
                 )
+            }
 
-                for (parsedSlide in parsedPdfSlides) {
-                    val slideEmbeddingVector =
-                        embedDocumentForRetrieval(
-                            title = title.ifBlank { null },
-                            text = parsedSlide.content,
-                        )
+            val parsedPdfSlides =
+                pdfFileDataSource.parsePdfByInternalPath(
+                    internalPath = internalPath,
+                    startPage = lastProcessedPage + 1,
+                )
 
-                    objectBoxDbDataSource.putPageEmbedding(
-                        pdfId = pdfId,
-                        pageEmbedding =
-                            PageEmbeddingEntity(
-                                pageNumber = parsedSlide.slideNumber,
-                                embeddingVector = slideEmbeddingVector,
-                            ),
-                    )
+            parsedPdfSlides.chunked(UPDATE_STATUS_STEP).forEach { chunk ->
+                val pageEmbeddings =
+                    chunk.map { parsedSlide ->
+                        val slideEmbeddingVector =
+                            embedDocumentForRetrieval(
+                                title = title.ifBlank { null },
+                                text = parsedSlide.content,
+                            )
 
-                    if (parsedSlide.slideNumber % UPDATE_STATUS_STEP == 0) {
-                        objectBoxDbDataSource.updatePdfStatus(
-                            pdfId = pdfId,
-                            newProcessedPages = parsedSlide.slideNumber,
-                            newStatus = EmbeddingStatus.IN_PROGRESS,
+                        PageEmbeddingEntity(
+                            pageNumber = parsedSlide.slideNumber,
+                            embeddingVector = slideEmbeddingVector,
                         )
                     }
-                }
 
-                objectBoxDbDataSource.updatePdfStatus(
+                objectBoxDbDataSource.insertEmbeddingChunkAndUpdateStatus(
                     pdfId = pdfId,
-                    newProcessedPages = totalPages,
-                    newStatus = EmbeddingStatus.COMPLETE,
+                    pageEmbeddings = pageEmbeddings,
+                    lastPageInChunk = chunk.last().slideNumber,
                 )
+            }
 
+            objectBoxDbDataSource.updatePdfStatus(
+                pdfId = pdfId,
+                newProcessedPages = totalPages,
+                newStatus = EmbeddingStatus.COMPLETE,
+            )
+        }
+
+        override suspend fun doWork(): Result {
+            val pdfId = inputData.getLong(KEY_PDF_ID, -1)
+            if (pdfId == -1L) {
+                Log.e(TAG, "Invalid pdfId. Work will not be retried.")
+                return Result.failure()
+            }
+
+            val title = inputData.getString(KEY_TITLE) ?: ""
+            val internalPath = inputData.getString(KEY_INTERNAL_PATH) ?: ""
+
+            val totalPages = inputData.getInt(KEY_TOTAL_PAGES, -1)
+            if (totalPages == -1) {
+                Log.e(TAG, "Invalid totalPages. Work will not be retried.")
+                return Result.failure()
+            }
+
+            return try {
+                embedAndStorePdfPages(pdfId, title, internalPath, totalPages)
                 Result.success()
-            } catch (throwable: Throwable) {
-                Log.e(TAG, "Error embedding document", throwable)
-
-                objectBoxDbDataSource.updatePdfStatus(
-                    pdfId = pdfId,
-                    newProcessedPages = 0,
-                    newStatus = EmbeddingStatus.FAIL,
+            } catch (e: CancellationException) {
+                Log.w(TAG, "Work for pdfId $pdfId was cancelled", e)
+                Result.failure()
+            } catch (tr: Throwable) {
+                Log.e(
+                    TAG,
+                    "An unexpected error occurred for pdfId $pdfId. Setting status to FAIL.",
+                    tr,
                 )
-
+                objectBoxDbDataSource.rollbackAndSetFailStatus(pdfId)
                 Result.failure()
             }
         }
@@ -103,9 +135,6 @@ class EmbedWorker
 
         companion object {
             private const val TAG = "EmbedWorker"
-            private const val DEFAULT_PDF_ID = -1L
-            private const val DEFAULT_INTERNAL_PATH = ""
-            private const val DEFAULT_TOTAL_PAGES = -1
             const val KEY_PDF_ID = "pdf_id"
             const val KEY_TITLE = "title"
             const val KEY_INTERNAL_PATH = "internal_path"

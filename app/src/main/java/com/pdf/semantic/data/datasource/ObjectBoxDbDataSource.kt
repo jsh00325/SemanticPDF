@@ -22,23 +22,27 @@ class ObjectBoxDbDataSource
         private val pdfDocumentBox = boxStore.boxFor(PdfDocumentEntity::class.java)
         private val pageEmbeddingBox = boxStore.boxFor(PageEmbeddingEntity::class.java)
 
-        private suspend fun <T> runInIoTx(block: () -> T): T =
+        private suspend fun runInIoTx(block: () -> Unit) =
             withContext(Dispatchers.IO) {
-                boxStore.runInTx { block() } as T
+                boxStore.runInTx { block() }
             }
 
-        suspend fun insertPdfDocument(pdfDocument: PdfDocumentEntity) =
-            runInIoTx {
+        suspend fun insertPdfDocument(pdfDocument: PdfDocumentEntity): Long =
+            withContext(Dispatchers.IO) {
                 pdfDocumentBox.put(pdfDocument)
             }
 
-        suspend fun insertPageEmbeddingsInChunk(
+        suspend fun insertEmbeddingChunkAndUpdateStatus(
             pdfId: Long,
             pageEmbeddings: List<PageEmbeddingEntity>,
+            lastPageInChunk: Int,
         ) = runInIoTx {
             pdfDocumentBox.get(pdfId)?.also { pdfDocument ->
                 pageEmbeddings.forEach { it.pdfDocument.target = pdfDocument }
                 pdfDocument.pageEmbeddings.addAll(pageEmbeddings)
+
+                pdfDocument.processedPages = lastPageInChunk
+
                 pdfDocumentBox.put(pdfDocument)
             }
         }
@@ -101,4 +105,17 @@ class ObjectBoxDbDataSource
 
         fun observeAllPdfDocuments(): Flow<List<PdfDocumentEntity>> =
             pdfDocumentBox.query().build().asFlow(pdfDocumentBox)
+
+        suspend fun rollbackAndSetFailStatus(pdfId: Long) =
+            runInIoTx {
+                pdfDocumentBox.get(pdfId)?.also { pdfDocument ->
+                    pageEmbeddingBox.remove(pdfDocument.pageEmbeddings)
+
+                    pdfDocument.processedPages = 0
+                    pdfDocument.embeddingStatus = EmbeddingStatus.FAIL
+                    pdfDocument.pageEmbeddings.clear()
+
+                    pdfDocumentBox.put(pdfDocument)
+                }
+            }
     }

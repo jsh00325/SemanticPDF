@@ -9,6 +9,4 @@ interface EmbeddingRepository {
         internalPath: String,
         totalPages: Int,
     )
-
-    fun cancelEmbedding(pdfId: Long)
 }

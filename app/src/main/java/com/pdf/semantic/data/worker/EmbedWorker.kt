@@ -1,6 +1,7 @@
 package com.pdf.semantic.data.worker
 
 import android.content.Context
+import android.os.Trace
 import android.util.Log
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
@@ -36,6 +37,9 @@ class EmbedWorker
             return embeddingDataSource.embed(tokens)
         }
 
+        private suspend fun checkFileExist(pdfId: Long): Boolean =
+            objectBoxDbDataSource.getPdfDocumentById(pdfId) != null
+
         private suspend fun embedAndStorePdfPages(
             pdfId: Long,
             title: String,
@@ -45,7 +49,7 @@ class EmbedWorker
             val currentPdfDocument = objectBoxDbDataSource.getPdfDocumentById(pdfId)
 
             if (currentPdfDocument == null) {
-                Log.w(TAG, "PDF document with id $pdfId not found. Assuming deleted. Work stopped.")
+                Log.w(TAG, LOG_MSG_PDF_NOT_FOUND.format(pdfId))
                 return
             }
             if (currentPdfDocument.embeddingStatus == EmbeddingStatus.COMPLETE) {
@@ -70,6 +74,11 @@ class EmbedWorker
                 )
 
             parsedPdfSlides.chunked(UPDATE_STATUS_STEP).forEach { chunk ->
+                if (!checkFileExist(pdfId)) {
+                    Log.w(TAG, LOG_MSG_PDF_NOT_FOUND.format(pdfId))
+                    return
+                }
+
                 val pageEmbeddings =
                     chunk.map { parsedSlide ->
                         val slideEmbeddingVector =
@@ -140,5 +149,7 @@ class EmbedWorker
             const val KEY_INTERNAL_PATH = "internal_path"
             const val KEY_TOTAL_PAGES = "total_pages"
             private const val UPDATE_STATUS_STEP = 10
+            private const val LOG_MSG_PDF_NOT_FOUND =
+                "PDF document with id %d not found. Assuming deleted. Work stopped."
         }
     }

@@ -45,7 +45,6 @@ class EmbeddingRepositoryImpl
                 OneTimeWorkRequestBuilder<EmbedWorker>()
                     .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
                     .setInputData(inputData)
-                    .addTag(getWorkTag(pdfId))
                     .build()
 
             workManager.enqueueUniqueWork(
@@ -53,14 +52,5 @@ class EmbeddingRepositoryImpl
                 existingWorkPolicy = ExistingWorkPolicy.APPEND,
                 request = embedWorkRequest,
             )
-        }
-
-        override fun cancelEmbedding(pdfId: Long) {
-            val workTag = getWorkTag(pdfId)
-            workManager.cancelAllWorkByTag(workTag)
-        }
-
-        companion object {
-            fun getWorkTag(pdfId: Long): String = "pdf-$pdfId"
         }
     }

@@ -6,9 +6,9 @@ import kotlinx.coroutines.flow.Flow
 interface PdfMetadataRepository {
     suspend fun getAllEmbeddedPdfIds(): List<Long>
 
-    suspend fun getPdfInternalPath(pdfId: Long): String
+    suspend fun getPdfInternalPath(pdfId: Long): String?
 
-    suspend fun getPdfMetadata(pdfId: Long): PdfItem
+    suspend fun getPdfMetadata(pdfId: Long): PdfItem?
 
     suspend fun insertPdfMetadata(
         fileName: String,

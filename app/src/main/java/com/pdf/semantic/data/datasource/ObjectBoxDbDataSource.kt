@@ -38,6 +38,17 @@ class ObjectBoxDbDataSource
             pageEmbeddingBox.put(pageEmbedding)
         }
 
+        suspend fun putPageEmbeddingsInChunk(
+            pdfId: Long,
+            pageEmbeddings: List<PageEmbeddingEntity>,
+        ) = withContext(Dispatchers.IO) {
+            val pdfDocument = pdfDocumentBox.get(pdfId)
+            pageEmbeddings.forEach { it.pdfDocument.target = pdfDocument }
+            pdfDocument.pageEmbeddings.addAll(pageEmbeddings)
+            pdfDocumentBox.put(pdfDocument)
+            pageEmbeddingBox.put(pageEmbeddings)
+        }
+
         suspend fun getPdfDocumentById(pdfId: Long): PdfDocumentEntity =
             withContext(Dispatchers.IO) {
                 pdfDocumentBox.get(pdfId)

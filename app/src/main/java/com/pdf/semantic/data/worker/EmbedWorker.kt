@@ -1,7 +1,6 @@
 package com.pdf.semantic.data.worker
 
 import android.content.Context
-import android.os.Trace
 import android.util.Log
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
@@ -15,7 +14,6 @@ import com.pdf.semantic.data.entity.PageEmbeddingEntity
 import com.pdf.semantic.domain.model.EmbeddingStatus
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
-import kotlin.coroutines.cancellation.CancellationException
 
 @HiltWorker
 class EmbedWorker
@@ -126,15 +124,8 @@ class EmbedWorker
             return try {
                 embedAndStorePdfPages(pdfId, title, internalPath, totalPages)
                 Result.success()
-            } catch (e: CancellationException) {
-                Log.w(TAG, "Work for pdfId $pdfId was cancelled", e)
-                Result.failure()
             } catch (tr: Throwable) {
-                Log.e(
-                    TAG,
-                    "An unexpected error occurred for pdfId $pdfId. Setting status to FAIL.",
-                    tr,
-                )
+                Log.e(TAG, "Error occurred for pdfId $pdfId. Setting status to FAIL.", tr)
                 objectBoxDbDataSource.rollbackAndSetFailStatus(pdfId)
                 Result.failure()
             }

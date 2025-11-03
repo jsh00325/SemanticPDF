@@ -60,7 +60,10 @@ class PdfFileDataSource
                 imageFile.absolutePath
             }
 
-        suspend fun parsePdfByInternalPath(internalPath: String): List<Slide> =
+        suspend fun parsePdfByInternalPath(
+            internalPath: String,
+            startPage: Int = 1,
+        ): List<Slide> =
             withContext(Dispatchers.IO) {
                 val slides = mutableListOf<Slide>()
 
@@ -68,7 +71,7 @@ class PdfFileDataSource
                 val document = PDDocument.load(file)
                 val pdfStripper = PDFTextStripper()
 
-                for (page in 1..document.numberOfPages) {
+                for (page in startPage..document.numberOfPages) {
                     pdfStripper.startPage = page
                     pdfStripper.endPage = page
 

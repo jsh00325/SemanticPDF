@@ -7,7 +7,6 @@ import android.net.Uri
 import android.provider.OpenableColumns
 import androidx.core.graphics.createBitmap
 import androidx.core.net.toUri
-import com.pdf.semantic.domain.model.PdfDocument
 import com.pdf.semantic.domain.model.PdfInfo
 import com.pdf.semantic.domain.model.Slide
 import com.tom_roush.pdfbox.pdmodel.PDDocument
@@ -28,7 +27,6 @@ class PdfFileDataSource
         @ApplicationContext private val context: Context,
     ) {
         private fun getFileName(uri: Uri): String {
-            var result: String? = null
             if (uri.scheme == "content") {
                 context.contentResolver
                     .query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)
@@ -36,69 +34,64 @@ class PdfFileDataSource
                         if (cursor.moveToFirst()) {
                             val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
                             if (nameIndex >= 0) {
-                                result = cursor.getString(nameIndex)
+                                return cursor.getString(nameIndex).removeSuffix(".pdf")
                             }
                         }
                     }
             }
-            if (result == null) {
-                result = uri.path
-                val cut = result?.lastIndexOf('/')
-                if (cut != -1 && cut != null) {
-                    result = result?.substring(cut + 1)
-                }
-            }
-            return result ?: "Unknown Title"
+
+            return uri.path
+                ?.substringAfterLast('/')
+                ?.removeSuffix(".pdf")
+                ?: "Unknown Title"
         }
 
         private suspend fun saveThumbnailImage(bitmap: Bitmap): String =
             withContext(Dispatchers.IO) {
                 val internalDir = context.filesDir
-                val uniqueFileName = "${UUID.randomUUID()}.png"
+                val uniqueFileName = "${UUID.randomUUID()}.jpeg"
                 val imageFile = File(internalDir, uniqueFileName)
 
                 FileOutputStream(imageFile).use { outputStream ->
-                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 90, outputStream)
                     outputStream.flush()
                 }
 
                 imageFile.absolutePath
             }
 
-        suspend fun parsePdf(uriString: String): PdfDocument =
+        suspend fun parsePdfByInternalPath(
+            internalPath: String,
+            startPage: Int = 1,
+        ): List<Slide> =
             withContext(Dispatchers.IO) {
-                val uri = uriString.toUri()
                 val slides = mutableListOf<Slide>()
 
-                val paragraphRegex = "\n{2,}".toRegex()
-                val paragraphPlaceholder = "__PARAGRAPH_BREAK__"
+                val file = File(internalPath)
+                val document = PDDocument.load(file)
+                val pdfStripper = PDFTextStripper()
 
-                context.contentResolver.openInputStream(uri)?.use { inputStream ->
-                    val document = PDDocument.load(inputStream)
-                    val pdfStripper = PDFTextStripper()
+                for (page in startPage..document.numberOfPages) {
+                    pdfStripper.startPage = page
+                    pdfStripper.endPage = page
 
-                    for (page in 1..document.numberOfPages) {
-                        pdfStripper.startPage = page
-                        pdfStripper.endPage = page
+                    val rawText = pdfStripper.getText(document)
+                    val textStep1 = rawText.replace("-\n", "")
+                    val textStep2 = textStep1.replace(PARAGRAPH_REGEX, PARAGRAPH_PLACEHOLDER)
+                    val textStep3 = textStep2.replace("\n", " ")
+                    val finalContent = textStep3.replace(PARAGRAPH_PLACEHOLDER, "\n")
 
-                        val rawText = pdfStripper.getText(document)
-                        val textStep1 = rawText.replace("-\n", "")
-                        val textStep2 = textStep1.replace(paragraphRegex, paragraphPlaceholder)
-                        val textStep3 = textStep2.replace("\n", " ")
-                        val finalContent = textStep3.replace(paragraphPlaceholder, "\n")
+                    slides.add(
+                        Slide(
+                            slideNumber = page,
+                            content = finalContent.trim(),
+                            similarity = null,
+                        ),
+                    )
+                }
+                document.close()
 
-                        slides.add(
-                            Slide(
-                                slideNumber = page,
-                                content = finalContent.trim(),
-                                similarity = null,
-                            ),
-                        )
-                    }
-                    document.close()
-                } ?: throw IllegalStateException("Uri로부터 InputStream을 열 수 없습니다: $uri")
-                val title = getFileName(uri)
-                PdfDocument(uri = uri, title = title, slides = slides)
+                slides
             }
 
         suspend fun getPdfDetail(uriString: String): PdfInfo =
@@ -111,7 +104,17 @@ class PdfFileDataSource
 
                     val totalPages = pdfRenderer.pageCount
                     val thumbnailPage = pdfRenderer.openPage(0)
-                    val thumbnailBitmap = createBitmap(thumbnailPage.width, thumbnailPage.height)
+                    val thumbnailBitmap =
+                        createBitmap(
+                            thumbnailPage.width,
+                            thumbnailPage.height,
+                            Bitmap.Config.ARGB_8888,
+                        )
+
+                    val canvas = android.graphics.Canvas(thumbnailBitmap)
+                    canvas.drawColor(android.graphics.Color.WHITE)
+                    canvas.drawBitmap(thumbnailBitmap, 0f, 0f, null)
+
                     thumbnailPage.render(
                         thumbnailBitmap,
                         null,
@@ -156,4 +159,9 @@ class PdfFileDataSource
                     file.delete()
                 }
             }
+
+        companion object {
+            private val PARAGRAPH_REGEX = "\n{2,}".toRegex()
+            private const val PARAGRAPH_PLACEHOLDER = "__PARAGRAPH_BREAK__"
+        }
     }

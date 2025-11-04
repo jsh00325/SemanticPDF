@@ -10,7 +10,9 @@ class GetPdfDetailUsecase
     ) {
         suspend operator fun invoke(pdfId: Long): Result<String> =
             try {
-                val internalPath = pdfMetadataRepository.getPdfInternalPath(pdfId)
+                val internalPath =
+                    pdfMetadataRepository.getPdfInternalPath(pdfId)
+                        ?: throw NullPointerException("PDF internal path not found")
                 Result.success(internalPath)
             } catch (e: Exception) {
                 e.printStackTrace()

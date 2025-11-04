@@ -12,10 +12,9 @@ class DeletePdfUsecase
     ) {
         suspend operator fun invoke(pdfId: Long): Result<Unit> =
             try {
-                val internalPath = pdfMetadataRepository.getPdfInternalPath(pdfId)
-
-                pdfFileRepository.deletePdfFile(internalPath)
-
+                pdfMetadataRepository.getPdfInternalPath(pdfId)?.let {
+                    pdfFileRepository.deletePdfFile(it)
+                }
                 pdfMetadataRepository.deletePdfMetadata(pdfId)
 
                 Result.success(Unit)

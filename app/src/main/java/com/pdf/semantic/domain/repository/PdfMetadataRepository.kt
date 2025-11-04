@@ -1,15 +1,14 @@
 package com.pdf.semantic.domain.repository
 
-import com.pdf.semantic.domain.model.EmbeddingStatus
 import com.pdf.semantic.domain.model.PdfItem
 import kotlinx.coroutines.flow.Flow
 
 interface PdfMetadataRepository {
     suspend fun getAllEmbeddedPdfIds(): List<Long>
 
-    suspend fun getPdfInternalPath(pdfId: Long): String
+    suspend fun getPdfInternalPath(pdfId: Long): String?
 
-    suspend fun getPdfMetadata(pdfId: Long): PdfItem
+    suspend fun getPdfMetadata(pdfId: Long): PdfItem?
 
     suspend fun insertPdfMetadata(
         fileName: String,
@@ -19,11 +18,6 @@ interface PdfMetadataRepository {
     ): Long
 
     suspend fun deletePdfMetadata(pdfId: Long)
-
-    suspend fun updateEmbeddingStatus(
-        pdfId: Long,
-        status: EmbeddingStatus,
-    )
 
     fun observeAllPdfMetadata(): Flow<List<PdfItem>>
 

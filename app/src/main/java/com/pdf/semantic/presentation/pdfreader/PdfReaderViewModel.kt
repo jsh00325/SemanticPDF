@@ -5,11 +5,9 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pdf.semantic.domain.model.PdfReaderUiState
-import com.pdf.semantic.domain.repository.PdfFileRepository
-import com.pdf.semantic.domain.repository.PdfMetadataRepository
 import com.pdf.semantic.domain.usecase.pdfreader.GetPdfDetailUsecase
+import com.pdf.semantic.domain.usecase.pdfreader.LoadSpecificPdfUsecase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -21,8 +19,7 @@ class PdfReaderViewModel
     @Inject
     constructor(
         savedStateHandle: SavedStateHandle,
-        private val pdfMetadataRepository: PdfMetadataRepository,
-        private val pdfFileRepository: PdfFileRepository,
+        private val loadSpecificPdfUsecase: LoadSpecificPdfUsecase,
         private val getPdfDetailUsecase: GetPdfDetailUsecase,
     ) : ViewModel() {
         private val _uiState = MutableStateFlow(PdfReaderUiState())
@@ -43,36 +40,32 @@ class PdfReaderViewModel
         private fun loadInfoAndTriggerPreload() {
             viewModelScope.launch {
                 _uiState.update { it.copy(isLoading = true) }
-                try {
-                    val metadata = pdfMetadataRepository.getPdfMetadata(pdfId)
 
-                    internalPath = pdfMetadataRepository.getPdfInternalPath(pdfId)
+                val result = loadSpecificPdfUsecase(pdfId)
 
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            title = metadata.title,
-                            totalPages = metadata.totalPages,
-                        )
+                result
+                    .onSuccess { pdfDetail ->
+                        internalPath = pdfDetail.internalPath
+
+                        _uiState.update {
+                            it.copy(
+                                isLoading = false,
+                                title = pdfDetail.title,
+                                totalPages = pdfDetail.totalPages,
+                            )
+                        }
+                    }.onFailure { e ->
+                        e.printStackTrace()
+                        _uiState.update { it.copy(isLoading = false, title = "PDF 로드 오류") }
                     }
-
-                    launch(Dispatchers.IO) {
-                        getPdfDetailUsecase(pdfId)
-                    }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    _uiState.update { it.copy(isLoading = false, title = "PDF 로드 오류") }
-                }
             }
         }
 
-        suspend fun getPageBitmap(pageNumber: Int): Bitmap? {
-            if (internalPath.isEmpty()) return null
-            return try {
-                pdfFileRepository.getPageBitmap(pdfId, internalPath, pageNumber)
+        suspend fun getPageBitmap(pageNumber: Int): Bitmap? =
+            try {
+                getPdfDetailUsecase(pdfId, pageNumber)
             } catch (e: Exception) {
                 e.printStackTrace()
                 null
             }
-        }
     }

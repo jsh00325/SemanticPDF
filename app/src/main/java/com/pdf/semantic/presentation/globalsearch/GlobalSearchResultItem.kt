@@ -1,4 +1,4 @@
-package com.pdf.semantic.presentation.components
+package com.pdf.semantic.presentation.globalsearch
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -25,10 +25,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.pdf.semantic.presentation.globalsearch.GlobalSearchUiItem
 
 @Composable
-fun GlobalSearchItem(
+fun GlobalSearchResultItem(
     modifier: Modifier = Modifier,
     onItemClick: () -> Unit = {},
     uiItem: GlobalSearchUiItem,

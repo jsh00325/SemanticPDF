@@ -1,4 +1,4 @@
-package com.pdf.semantic.presentation.components
+package com.pdf.semantic.presentation.pdflist
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background

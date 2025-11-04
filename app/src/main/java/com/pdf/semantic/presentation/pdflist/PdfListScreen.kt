@@ -30,7 +30,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.pdf.semantic.R
 import com.pdf.semantic.domain.model.PdfItem
-import com.pdf.semantic.presentation.components.PdfListItem
 
 @Composable
 fun PdfListScreen(

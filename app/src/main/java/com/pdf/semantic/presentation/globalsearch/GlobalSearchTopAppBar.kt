@@ -1,4 +1,4 @@
-package com.pdf.semantic.presentation.components
+package com.pdf.semantic.presentation.globalsearch
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Column
@@ -31,10 +31,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.pdf.semantic.R
+import com.pdf.semantic.presentation.components.AIExpansionToggleButton
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchTopAppBar(
+fun GlobalSearchTopAppBar(
     modifier: Modifier = Modifier,
     onBackClick: () -> Unit,
     query: String,

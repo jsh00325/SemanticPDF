@@ -17,8 +17,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.pdf.semantic.presentation.components.GlobalSearchItem
-import com.pdf.semantic.presentation.components.SearchTopAppBar
 
 @Composable
 fun GlobalSearchScreen(
@@ -33,7 +31,7 @@ fun GlobalSearchScreen(
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            SearchTopAppBar(
+            GlobalSearchTopAppBar(
                 modifier =
                     Modifier
                         .padding(8.dp)
@@ -82,7 +80,7 @@ fun GlobalSearchScreen(
                         verticalArrangement = Arrangement.spacedBy(32.dp),
                     ) {
                         items(searchResults) { result ->
-                            GlobalSearchItem(
+                            GlobalSearchResultItem(
                                 modifier = Modifier.padding(horizontal = 16.dp),
                                 onItemClick = { /* TODO: 클릭 시 상세 페이지로 이동 */ },
                                 uiItem = result,

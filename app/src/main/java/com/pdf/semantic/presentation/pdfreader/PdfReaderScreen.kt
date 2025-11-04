@@ -11,9 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -77,48 +75,22 @@ fun PdfReaderScreen(
                         count = uiState.totalPages,
                         key = { index -> index },
                     ) { pageIndex ->
+                        var bitmap by remember { mutableStateOf<Bitmap?>(null) }
 
-                        SlideLoader(
-                            viewModel = viewModel,
-                            pageNumber = pageIndex,
+                        LaunchedEffect(key1 = pageIndex) {
+                            bitmap = viewModel.getPageBitmap(pageIndex)
+                        }
+
+                        SlideListItem(
+                            bitmap = bitmap,
                             onItemClick = {
                                 // TODO: 페이지 클릭 시 이벤트
                             },
+                            pageText = "${pageIndex + 1} / ${uiState.totalPages}",
                         )
                     }
                 }
             }
         }
-
-        FloatingActionButton(
-            onClick = { /* TODO */ },
-            modifier =
-                Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(16.dp),
-        ) {
-            Icon(
-                Icons.Filled.Search,
-                contentDescription = "검색",
-            )
-        }
     }
-}
-
-@Composable
-private fun SlideLoader(
-    viewModel: PdfReaderViewModel,
-    pageNumber: Int,
-    onItemClick: () -> Unit,
-) {
-    var bitmap by remember { mutableStateOf<Bitmap?>(null) }
-
-    LaunchedEffect(key1 = pageNumber) {
-        bitmap = viewModel.getPageBitmap(pageNumber)
-    }
-
-    SlideListItem(
-        bitmap = bitmap,
-        onItemClick = onItemClick,
-    )
 }

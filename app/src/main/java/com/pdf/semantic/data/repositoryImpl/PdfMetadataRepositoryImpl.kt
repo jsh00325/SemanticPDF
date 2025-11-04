@@ -25,11 +25,11 @@ class PdfMetadataRepositoryImpl
                 .filter { it.embeddingStatus == EmbeddingStatus.COMPLETE }
                 .map { it.id }
 
-        override suspend fun getPdfInternalPath(pdfId: Long): String =
-            objectBoxDbDataSource.getPdfDocumentById(pdfId).internalFilePath
+        override suspend fun getPdfInternalPath(pdfId: Long): String? =
+            objectBoxDbDataSource.getPdfDocumentById(pdfId)?.internalFilePath
 
-        override suspend fun getPdfMetadata(pdfId: Long): PdfItem =
-            objectBoxDbDataSource.getPdfDocumentById(pdfId).toModel()
+        override suspend fun getPdfMetadata(pdfId: Long): PdfItem? =
+            objectBoxDbDataSource.getPdfDocumentById(pdfId)?.toModel()
 
         override suspend fun insertPdfMetadata(
             fileName: String,
@@ -37,7 +37,7 @@ class PdfMetadataRepositoryImpl
             totalPages: Int,
             thumbnailPath: String,
         ): Long =
-            objectBoxDbDataSource.putPdfDocument(
+            objectBoxDbDataSource.insertPdfDocument(
                 PdfDocumentEntity(
                     title = fileName,
                     internalFilePath = internalPath,
@@ -49,15 +49,6 @@ class PdfMetadataRepositoryImpl
 
         override suspend fun deletePdfMetadata(pdfId: Long) {
             objectBoxDbDataSource.deletePdfDocument(pdfId)
-        }
-
-        override suspend fun updateEmbeddingStatus(
-            pdfId: Long,
-            status: EmbeddingStatus,
-        ) {
-            val pdfDocument = objectBoxDbDataSource.getPdfDocumentById(pdfId)
-            pdfDocument.embeddingStatus = status
-            objectBoxDbDataSource.putPdfDocument(pdfDocument)
         }
 
         override fun observeAllPdfMetadata(): Flow<List<PdfItem>> =

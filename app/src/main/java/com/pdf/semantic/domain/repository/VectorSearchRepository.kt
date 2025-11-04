@@ -15,11 +15,5 @@ interface VectorSearchRepository {
         topK: Int,
     ): List<SearchResult>
 
-    suspend fun insertEmbeddingVector(
-        pdfId: Long,
-        pageNumber: Int,
-        embeddingVector: FloatArray,
-    )
-
     suspend fun expandQuery(query: String): String
 }

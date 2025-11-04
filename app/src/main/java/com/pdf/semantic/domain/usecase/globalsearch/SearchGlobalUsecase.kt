@@ -37,7 +37,10 @@ class SearchGlobalUsecase
                 )
 
             return searchResults.map { searchResult ->
-                val pdfMetadata = pdfMetadataRepository.getPdfMetadata(searchResult.pdfId)
+                // TODO: Result 객체로 리팩토링 하기
+                val pdfMetadata =
+                    pdfMetadataRepository.getPdfMetadata(searchResult.pdfId)
+                        ?: throw NullPointerException("PDF metadata not found")
 
                 GlobalSearchResult(
                     pdfId = pdfMetadata.id,

@@ -4,6 +4,7 @@ import com.pdf.semantic.data.dto.PageEmbeddingSearchResult
 import com.pdf.semantic.data.entity.PageEmbeddingEntity
 import com.pdf.semantic.data.entity.PageEmbeddingEntity_
 import com.pdf.semantic.data.entity.PdfDocumentEntity
+import com.pdf.semantic.domain.model.EmbeddingStatus
 import io.objectbox.BoxStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -16,28 +17,37 @@ import javax.inject.Singleton
 class ObjectBoxDbDataSource
     @Inject
     constructor(
-        boxStore: BoxStore,
+        private val boxStore: BoxStore,
     ) {
         private val pdfDocumentBox = boxStore.boxFor(PdfDocumentEntity::class.java)
         private val pageEmbeddingBox = boxStore.boxFor(PageEmbeddingEntity::class.java)
 
-        suspend fun putPdfDocument(pdfDocument: PdfDocumentEntity) =
+        private suspend fun runInIoTx(block: () -> Unit) =
+            withContext(Dispatchers.IO) {
+                boxStore.runInTx { block() }
+            }
+
+        suspend fun insertPdfDocument(pdfDocument: PdfDocumentEntity): Long =
             withContext(Dispatchers.IO) {
                 pdfDocumentBox.put(pdfDocument)
             }
 
-        suspend fun putPageEmbedding(
+        suspend fun insertEmbeddingChunkAndUpdateStatus(
             pdfId: Long,
-            pageEmbedding: PageEmbeddingEntity,
-        ) = withContext(Dispatchers.IO) {
-            val pdfDocument = pdfDocumentBox.get(pdfId)
-            pageEmbedding.pdfDocument.target = pdfDocument
-            pdfDocument.pageEmbeddings.add(pageEmbedding)
-            pdfDocumentBox.put(pdfDocument)
-            pageEmbeddingBox.put(pageEmbedding)
+            pageEmbeddings: List<PageEmbeddingEntity>,
+            lastPageInChunk: Int,
+        ) = runInIoTx {
+            pdfDocumentBox.get(pdfId)?.also { pdfDocument ->
+                pageEmbeddings.forEach { it.pdfDocument.target = pdfDocument }
+                pdfDocument.pageEmbeddings.addAll(pageEmbeddings)
+
+                pdfDocument.processedPages = lastPageInChunk
+
+                pdfDocumentBox.put(pdfDocument)
+            }
         }
 
-        suspend fun getPdfDocumentById(pdfId: Long): PdfDocumentEntity =
+        suspend fun getPdfDocumentById(pdfId: Long): PdfDocumentEntity? =
             withContext(Dispatchers.IO) {
                 pdfDocumentBox.get(pdfId)
             }
@@ -52,31 +62,42 @@ class ObjectBoxDbDataSource
             topK: Int = 100,
         ): List<PageEmbeddingSearchResult> =
             withContext(Dispatchers.IO) {
-                val query =
-                    pageEmbeddingBox
-                        .query(
-                            PageEmbeddingEntity_.embeddingVector.nearestNeighbors(
-                                queryVector,
-                                topK,
-                            ),
-                        ).build()
-
-                val results = query.findWithScores()
-                query.close()
-
-                results.map {
-                    PageEmbeddingSearchResult(
-                        entity = it.get(),
-                        score = it.score,
-                    )
-                }
+                pageEmbeddingBox
+                    .query(
+                        PageEmbeddingEntity_.embeddingVector.nearestNeighbors(
+                            queryVector,
+                            topK,
+                        ),
+                    ).build()
+                    .use { query ->
+                        val results = query.findWithScores()
+                        results.map {
+                            PageEmbeddingSearchResult(
+                                entity = it.get(),
+                                score = it.score,
+                            )
+                        }
+                    }
             }
 
+        suspend fun updatePdfStatus(
+            pdfId: Long,
+            newProcessedPages: Int,
+            newStatus: EmbeddingStatus,
+        ) = runInIoTx {
+            pdfDocumentBox.get(pdfId)?.also {
+                it.processedPages = newProcessedPages
+                it.embeddingStatus = newStatus
+                pdfDocumentBox.put(it)
+            }
+        }
+
         suspend fun deletePdfDocument(pdfId: Long) =
-            withContext(Dispatchers.IO) {
-                val targetPdfDocument = pdfDocumentBox.get(pdfId)
-                pageEmbeddingBox.remove(targetPdfDocument.pageEmbeddings)
-                pdfDocumentBox.remove(targetPdfDocument)
+            runInIoTx {
+                pdfDocumentBox.get(pdfId)?.also {
+                    pageEmbeddingBox.remove(it.pageEmbeddings)
+                    pdfDocumentBox.remove(it)
+                }
             }
 
         fun observePdfDocumentById(pdfId: Long): Flow<PdfDocumentEntity> =
@@ -84,4 +105,17 @@ class ObjectBoxDbDataSource
 
         fun observeAllPdfDocuments(): Flow<List<PdfDocumentEntity>> =
             pdfDocumentBox.query().build().asFlow(pdfDocumentBox)
+
+        suspend fun rollbackAndSetFailStatus(pdfId: Long) =
+            runInIoTx {
+                pdfDocumentBox.get(pdfId)?.also { pdfDocument ->
+                    pageEmbeddingBox.remove(pdfDocument.pageEmbeddings)
+
+                    pdfDocument.processedPages = 0
+                    pdfDocument.embeddingStatus = EmbeddingStatus.FAIL
+                    pdfDocument.pageEmbeddings.clear()
+
+                    pdfDocumentBox.put(pdfDocument)
+                }
+            }
     }

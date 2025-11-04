@@ -35,7 +35,7 @@ import com.pdf.semantic.presentation.components.AIExpansionToggleButton
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GlobalSearchTopAppBar(
+fun GlobalSearchTopSearchBar(
     modifier: Modifier = Modifier,
     onBackClick: () -> Unit,
     query: String,

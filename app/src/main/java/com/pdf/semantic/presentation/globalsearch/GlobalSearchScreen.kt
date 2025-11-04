@@ -31,7 +31,7 @@ fun GlobalSearchScreen(
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            GlobalSearchTopAppBar(
+            GlobalSearchTopSearchBar(
                 modifier =
                     Modifier
                         .padding(8.dp)

@@ -2,9 +2,12 @@ package com.pdf.semantic.data.datasource
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.graphics.pdf.PdfRenderer
 import android.net.Uri
+import android.os.ParcelFileDescriptor
 import android.provider.OpenableColumns
+import android.util.LruCache
 import androidx.core.graphics.createBitmap
 import androidx.core.net.toUri
 import com.pdf.semantic.domain.model.PdfInfo
@@ -159,6 +162,93 @@ class PdfFileDataSource
                     file.delete()
                 }
             }
+
+        suspend fun renderPage(
+            internalPath: String,
+            pageNumber: Int,
+        ): Bitmap =
+            withContext(Dispatchers.IO) {
+                val file = File(internalPath)
+                if (!file.exists()) {
+                    throw IllegalStateException("파일을 찾을 수 없습니다: $internalPath")
+                }
+
+                val fileDescriptor =
+                    ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
+
+                fileDescriptor.use { fd ->
+                    val pdfRenderer = PdfRenderer(fd)
+
+                    val page = pdfRenderer.openPage(pageNumber)
+
+                    val bitmap = createBitmap(page.width, page.height)
+
+                    val canvas = _root_ide_package_.coil3.Canvas(bitmap)
+                    canvas.drawColor(Color.WHITE)
+                    canvas.drawBitmap(bitmap, 0f, 0f, null)
+
+                    page.render(
+                        bitmap,
+                        null,
+                        null,
+                        PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY,
+                    )
+
+                    page.close()
+                    pdfRenderer.close()
+
+                    return@withContext bitmap
+                }
+            }
+
+        suspend fun preloadAllPages(
+            pdfId: Long,
+            internalPath: String,
+            totalPages: Int,
+        ) {
+            withContext(Dispatchers.IO) {
+                for (pageIndex in 0 until totalPages) {
+                    getPageBitmap(
+                        pdfId = pdfId,
+                        internalPath = internalPath,
+                        pageNumber = pageIndex,
+                    )
+                }
+            }
+        }
+
+        private val bitmapCache: LruCache<String, Bitmap>
+
+        init {
+            val maxMemory = (Runtime.getRuntime().maxMemory() / 1024).toInt()
+            val cacheSize = maxMemory / 8
+
+            bitmapCache =
+                object : LruCache<String, Bitmap>(cacheSize) {
+                    override fun sizeOf(
+                        key: String,
+                        bitmap: Bitmap,
+                    ): Int = bitmap.byteCount / 1024
+                }
+        }
+
+        suspend fun getPageBitmap(
+            pdfId: Long,
+            internalPath: String,
+            pageNumber: Int,
+        ): Bitmap {
+            val cacheKey = "${pdfId}_$pageNumber"
+
+            val cachedBitmap = bitmapCache.get(cacheKey)
+            if (cachedBitmap != null) {
+                return cachedBitmap
+            }
+
+            val renderedBitmap = renderPage(internalPath, pageNumber)
+
+            bitmapCache.put(cacheKey, renderedBitmap)
+            return renderedBitmap
+        }
 
         companion object {
             private val PARAGRAPH_REGEX = "\n{2,}".toRegex()

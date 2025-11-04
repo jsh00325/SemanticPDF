@@ -1,32 +1,38 @@
 package com.pdf.semantic.presentation.components
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TooltipAnchorPosition
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import com.pdf.semantic.R
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchTopAppBar(
     modifier: Modifier = Modifier,
@@ -34,7 +40,10 @@ fun SearchTopAppBar(
     query: String,
     onQueryChange: (String) -> Unit,
     onSearch: () -> Unit,
-    onSettingClick: () -> Unit,
+    isExpansionOn: Boolean,
+    onExpansionToggleClick: () -> Unit,
+    hasShownGuide: Boolean,
+    onGuideShown: () -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
@@ -50,7 +59,7 @@ fun SearchTopAppBar(
     ) {
         IconButton(onClick = onBackClick) {
             Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                painter = painterResource(id = R.drawable.baseline_arrow_back_24),
                 contentDescription = "Back",
             )
         }
@@ -74,7 +83,7 @@ fun SearchTopAppBar(
                     if (query.isNotEmpty()) {
                         IconButton(onClick = { onQueryChange("") }) {
                             Icon(
-                                imageVector = Icons.Default.Clear,
+                                painter = painterResource(id = R.drawable.baseline_clear_24),
                                 contentDescription = "Clear search query",
                             )
                         }
@@ -92,17 +101,38 @@ fun SearchTopAppBar(
             )
         }
 
-        IconButton(onClick = performSearch) {
-            Icon(
-                imageVector = Icons.Default.Search,
-                contentDescription = "Search",
+        val tooltipState = rememberTooltipState(isPersistent = true)
+        if (!hasShownGuide) {
+            onGuideShown()
+            LaunchedEffect(Unit) {
+                tooltipState.show()
+            }
+        }
+
+        TooltipBox(
+            positionProvider =
+                TooltipDefaults.rememberTooltipPositionProvider(
+                    TooltipAnchorPosition.Below,
+                ),
+            tooltip = {
+                PlainTooltip(caretShape = TooltipDefaults.caretShape()) {
+                    Column {
+                        Text("질문의 의도를 파악하여 검색 정확도를 높입니다.\n(인터넷 연결 필요)")
+                    }
+                }
+            },
+            state = tooltipState,
+        ) {
+            AIExpansionToggleButton(
+                isEnabled = isExpansionOn,
+                onClick = onExpansionToggleClick,
             )
         }
 
-        IconButton(onClick = onSettingClick) {
+        IconButton(onClick = performSearch) {
             Icon(
-                imageVector = Icons.Default.Settings,
-                contentDescription = "Search Settings",
+                painter = painterResource(id = R.drawable.baseline_search_24),
+                contentDescription = "Search",
             )
         }
     }

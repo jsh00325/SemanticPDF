@@ -12,9 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -28,8 +25,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.pdf.semantic.R
 import com.pdf.semantic.domain.model.PdfItem
 import com.pdf.semantic.presentation.components.PdfListItem
 
@@ -80,14 +79,14 @@ fun PdfListScreen(
         ) {
             IconButton(onClick = onGlobalSearchClick) {
                 Icon(
-                    imageVector = Icons.Default.Search,
+                    painter = painterResource(id = R.drawable.baseline_search_24),
                     contentDescription = "Global Search",
                 )
             }
 
             IconButton(onClick = { filePickerLauncher.launch("application/pdf") }) {
                 Icon(
-                    imageVector = Icons.Default.Add,
+                    painter = painterResource(id = R.drawable.baseline_add_24),
                     contentDescription = "Add PDF",
                 )
             }

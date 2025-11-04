@@ -25,9 +25,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.pdf.semantic.presentation.components.SlideListItem
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.pdf.semantic.R
 
 @Composable
 fun PdfReaderScreen(
@@ -47,7 +50,7 @@ fun PdfReaderScreen(
             ) {
                 IconButton(onClick = onBackClick) {
                     Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        painter = painterResource(id = R.drawable.baseline_arrow_back_24),
                         contentDescription = "Back",
                     )
                 }

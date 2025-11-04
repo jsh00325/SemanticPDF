@@ -27,17 +27,25 @@ fun GlobalSearchScreen(
 ) {
     val searchQuery by viewModel.searchQuery.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
+    val isExpansionOn by viewModel.isExpansionOn.collectAsState()
+    val hasShownGuide by viewModel.hasShownGuide.collectAsState()
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             SearchTopAppBar(
-                modifier = Modifier.padding(8.dp).fillMaxWidth(),
+                modifier =
+                    Modifier
+                        .padding(8.dp)
+                        .fillMaxWidth(),
                 onBackClick = onBackClick,
                 query = searchQuery,
                 onQueryChange = viewModel::onSearchQueryChanged,
                 onSearch = viewModel::searchQuery,
-                onSettingClick = {},
+                isExpansionOn = isExpansionOn,
+                onExpansionToggleClick = viewModel::onExpansionToggled,
+                hasShownGuide = hasShownGuide,
+                onGuideShown = viewModel::onGuideShown,
             )
         },
     ) { innerPadding ->
@@ -66,7 +74,10 @@ fun GlobalSearchScreen(
                     }
                 } else {
                     LazyColumn(
-                        modifier = Modifier.fillMaxSize().padding(innerPadding),
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .padding(innerPadding),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(32.dp),
                     ) {

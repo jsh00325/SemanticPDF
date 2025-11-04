@@ -56,9 +56,7 @@ fun SemanticPDFApp() {
                     route = PdfReader.routeWithArgs,
                     arguments = PdfReader.arguments,
                 ) {
-                    val pdfId = it.arguments?.getLong(PdfReader.PDF_ID_ARG)
                     PdfReaderScreen(
-                        pdfId = pdfId,
                         onBackClick = {
                             navController.popBackStack()
                         },

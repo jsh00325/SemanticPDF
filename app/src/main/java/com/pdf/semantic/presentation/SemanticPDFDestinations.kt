@@ -13,7 +13,9 @@ object PdfList : SemanticPDFDestination {
 
 object PdfReader : SemanticPDFDestination {
     override val route = "pdf_reader"
-    const val PDF_ID_ARG = "pdf_id"
+
+    const val PDF_ID_ARG = "pdfId"
+
     val routeWithArgs = "$route/{$PDF_ID_ARG}"
     val arguments =
         listOf(

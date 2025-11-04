@@ -248,6 +248,8 @@ class PdfFileDataSource
 
             bitmapCache.put(cacheKey, renderedBitmap)
             return renderedBitmap
+        }
+
         companion object {
             private val PARAGRAPH_REGEX = "\n{2,}".toRegex()
             private const val PARAGRAPH_PLACEHOLDER = "__PARAGRAPH_BREAK__"

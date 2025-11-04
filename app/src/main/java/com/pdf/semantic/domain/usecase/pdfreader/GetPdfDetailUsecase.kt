@@ -15,8 +15,11 @@ class GetPdfDetailUsecase
             pdfId: Long,
             pageNumber: Int,
         ): Bitmap? {
-            val internalPath = pdfMetadataRepository.getPdfInternalPath(pdfId)
+            val internalPath: String? = pdfMetadataRepository.getPdfInternalPath(pdfId)
 
+            if (internalPath == null) {
+                return null
+            }
             return pdfFileRepository.getPageBitmap(
                 pdfId = pdfId,
                 internalPath = internalPath,

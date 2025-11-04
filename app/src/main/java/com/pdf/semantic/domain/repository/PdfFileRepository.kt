@@ -1,7 +1,6 @@
 package com.pdf.semantic.domain.repository
 
 import android.graphics.Bitmap
-import com.pdf.semantic.domain.model.PdfDocument
 import com.pdf.semantic.domain.model.PdfInfo
 
 interface PdfFileRepository {

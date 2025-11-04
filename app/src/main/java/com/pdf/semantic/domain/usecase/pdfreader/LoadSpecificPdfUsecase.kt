@@ -3,9 +3,6 @@ package com.pdf.semantic.domain.usecase.pdfreader
 import com.pdf.semantic.domain.model.PdfDetailResult
 import com.pdf.semantic.domain.repository.PdfFileRepository
 import com.pdf.semantic.domain.repository.PdfMetadataRepository
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class LoadSpecificPdfUsecase
@@ -19,18 +16,20 @@ class LoadSpecificPdfUsecase
                 val metadata = pdfMetadataRepository.getPdfMetadata(pdfId)
                 val internalPath = pdfMetadataRepository.getPdfInternalPath(pdfId)
 
-                CoroutineScope(Dispatchers.IO).launch {
-                    pdfFileRepository.preloadAllPages(
-                        pdfId = pdfId,
-                        internalPath = internalPath,
-                        totalPages = metadata.totalPages,
-                    )
+                if (internalPath == null) {
+                    throw IllegalStateException("PDF의 내부 경로를 찾을 수 없습니다. ID: $pdfId")
                 }
+
+                pdfFileRepository.preloadAllPages(
+                    pdfId = pdfId,
+                    internalPath = internalPath,
+                    totalPages = metadata?.totalPages ?: 0,
+                )
 
                 val result =
                     PdfDetailResult(
-                        title = metadata.title,
-                        totalPages = metadata.totalPages,
+                        title = metadata?.title ?: "",
+                        totalPages = metadata?.totalPages ?: 0,
                         internalPath = internalPath,
                     )
 

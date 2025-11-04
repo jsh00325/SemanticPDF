@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,6 +41,8 @@ import java.util.Locale
 @Composable
 fun PdfListItem(
     modifier: Modifier = Modifier,
+    isMultiSelectMode: Boolean,
+    isSelected: Boolean,
     onItemClick: () -> Unit = {},
     onItemLongClick: () -> Unit = {},
     pdfItem: PdfItem,
@@ -78,6 +81,14 @@ fun PdfListItem(
                         .background(Color.LightGray),
                 contentScale = ContentScale.Fit,
             )
+
+            if (isMultiSelectMode) {
+                Checkbox(
+                    checked = isSelected,
+                    onCheckedChange = { onItemClick() },
+                    modifier = Modifier.align(Alignment.TopStart),
+                )
+            }
 
             if (pdfItem.status == EmbeddingStatus.COMPLETE) {
                 Image(

@@ -115,7 +115,7 @@ class PdfFileDataSource
                         )
 
                     val canvas = android.graphics.Canvas(thumbnailBitmap)
-                    canvas.drawColor(android.graphics.Color.WHITE)
+                    canvas.drawColor(Color.WHITE)
                     canvas.drawBitmap(thumbnailBitmap, 0f, 0f, null)
 
                     thumbnailPage.render(
@@ -207,7 +207,7 @@ class PdfFileDataSource
             totalPages: Int,
         ) {
             withContext(Dispatchers.IO) {
-                for (pageIndex in 0 until totalPages) {
+                for (pageIndex in 1..totalPages) {
                     getPageBitmap(
                         pdfId = pdfId,
                         internalPath = internalPath,

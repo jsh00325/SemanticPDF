@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pdf.semantic.domain.usecase.globalsearch.SearchGlobalUsecase
 import com.pdf.semantic.domain.usecase.pdfreader.GetPdfDetailUsecase
-import com.pdf.semantic.domain.usecase.pdfreader.LoadSpecificPdfUsecase
 import com.pdf.semantic.domain.usecase.setting.ObserveHasShownGuideUsecase
 import com.pdf.semantic.domain.usecase.setting.ObserveIsExpansionOnUsecase
 import com.pdf.semantic.domain.usecase.setting.SetHasShownGuideUsecase

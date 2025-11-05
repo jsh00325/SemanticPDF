@@ -26,9 +26,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.pdf.semantic.presentation.components.SlideListItem
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.pdf.semantic.R
+import com.pdf.semantic.presentation.components.SlideListItem
 
 @Composable
 fun PdfReaderScreen(
@@ -75,11 +75,12 @@ fun PdfReaderScreen(
                     items(
                         count = uiState.totalPages,
                         key = { index -> index },
-                    ) { pageIndex ->
+                    ) { index ->
                         var bitmap by remember { mutableStateOf<Bitmap?>(null) }
+                        val pageNumber = index + 1
 
-                        LaunchedEffect(key1 = pageIndex) {
-                            bitmap = viewModel.getPageBitmap(pageIndex)
+                        LaunchedEffect(key1 = pageNumber) {
+                            bitmap = viewModel.getPageBitmap(pageNumber)
                         }
 
                         SlideListItem(
@@ -87,7 +88,7 @@ fun PdfReaderScreen(
                             onItemClick = {
                                 // TODO: 페이지 클릭 시 이벤트
                             },
-                            pageText = "${pageIndex + 1} / ${uiState.totalPages}",
+                            pageText = "$pageNumber / ${uiState.totalPages}",
                         )
                     }
                 }

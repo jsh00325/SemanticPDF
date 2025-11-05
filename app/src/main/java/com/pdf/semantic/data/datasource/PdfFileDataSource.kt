@@ -179,7 +179,7 @@ class PdfFileDataSource
                 fileDescriptor.use { fd ->
                     val pdfRenderer = PdfRenderer(fd)
 
-                    val page = pdfRenderer.openPage(pageNumber)
+                    val page = pdfRenderer.openPage(pageNumber - 1)
 
                     val bitmap = createBitmap(page.width, page.height)
 

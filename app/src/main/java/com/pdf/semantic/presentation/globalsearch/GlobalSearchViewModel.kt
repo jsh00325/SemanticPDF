@@ -4,11 +4,14 @@ import android.graphics.Bitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pdf.semantic.domain.usecase.globalsearch.SearchGlobalUsecase
+import com.pdf.semantic.domain.usecase.pdfreader.GetPdfDetailUsecase
+import com.pdf.semantic.domain.usecase.pdfreader.LoadSpecificPdfUsecase
 import com.pdf.semantic.domain.usecase.setting.ObserveHasShownGuideUsecase
 import com.pdf.semantic.domain.usecase.setting.ObserveIsExpansionOnUsecase
 import com.pdf.semantic.domain.usecase.setting.SetHasShownGuideUsecase
 import com.pdf.semantic.domain.usecase.setting.SetIsExpansionOnUsecase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -28,6 +31,7 @@ class GlobalSearchViewModel
         observeHasShownGuide: ObserveHasShownGuideUsecase,
         private val setIsExpansionOn: SetIsExpansionOnUsecase,
         private val setHasShownGuide: SetHasShownGuideUsecase,
+        private val getPdfPageBitmap: GetPdfDetailUsecase,
     ) : ViewModel() {
         private val _searchQuery = MutableStateFlow("")
         val searchQuery = _searchQuery.asStateFlow()
@@ -84,14 +88,13 @@ class GlobalSearchViewModel
                     }
                 _uiState.value = GlobalSearchUiState.SearchingSuccess(initialUiItems)
 
-//                TODO: 추후 Usecase 구현 완료 후 주석 해제
-//                initialUiItems.forEach { item ->
-//                    viewModelScope.launch(Dispatchers.IO) {
-//                        getPdfPageBitmap(item.pdfId, item.slideNumber).onSuccess { bitmap ->
-//                            updateImageForItem(item.pdfId, item.slideNumber, bitmap)
-//                        }
-//                    }
-//                }
+                initialUiItems.forEach { item ->
+                    viewModelScope.launch(Dispatchers.IO) {
+                        getPdfPageBitmap(item.pdfId, item.slideNumber)?.let {
+                            updateImageForItem(item.pdfId, item.slideNumber, it)
+                        }
+                    }
+                }
             }
         }
 

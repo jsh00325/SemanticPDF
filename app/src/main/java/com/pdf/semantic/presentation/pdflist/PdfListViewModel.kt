@@ -77,6 +77,7 @@ class PdfListViewModel
         fun disableMultiSelectMode() {
             _isMultiSelectMode.value = false
             _selectedPdfIds.value = emptySet()
+            _isAllSelected.value = false
         }
 
         fun selectAll() {

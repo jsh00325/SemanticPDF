@@ -14,6 +14,7 @@ import com.pdf.semantic.data.entity.PageEmbeddingEntity
 import com.pdf.semantic.domain.model.EmbeddingStatus
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.CancellationException
 
 @HiltWorker
 class EmbedWorker
@@ -124,6 +125,9 @@ class EmbedWorker
             return try {
                 embedAndStorePdfPages(pdfId, title, internalPath, totalPages)
                 Result.success()
+            } catch (e: CancellationException) {
+                Log.w(TAG, "Work for pdfId $pdfId was cancelled. Retrying.", e)
+                Result.retry()
             } catch (tr: Throwable) {
                 Log.e(TAG, "Error occurred for pdfId $pdfId. Setting status to FAIL.", tr)
                 objectBoxDbDataSource.rollbackAndSetFailStatus(pdfId)

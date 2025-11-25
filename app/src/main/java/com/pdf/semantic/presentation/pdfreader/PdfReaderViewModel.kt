@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.pdf.semantic.domain.model.PdfReaderUiState
 import com.pdf.semantic.domain.usecase.pdfreader.GetPdfDetailUsecase
 import com.pdf.semantic.domain.usecase.pdfreader.LoadSpecificPdfUsecase
+import com.pdf.semantic.domain.usecase.pdfreader.SearchInDocumentUsecase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,6 +22,7 @@ class PdfReaderViewModel
         savedStateHandle: SavedStateHandle,
         private val loadSpecificPdfUsecase: LoadSpecificPdfUsecase,
         private val getPdfDetailUsecase: GetPdfDetailUsecase,
+        private val searchInDocumentUsecase: SearchInDocumentUsecase,
     ) : ViewModel() {
         private val _uiState = MutableStateFlow(PdfReaderUiState())
         val uiState = _uiState.asStateFlow()
@@ -82,9 +84,69 @@ class PdfReaderViewModel
 
         fun onSearchTriggered() {
             val query = _uiState.value.searchQuery
-            if (query.isNotBlank()) {
-                // TODO: 여기서 Embedding 검색 UseCase 호출
-                println("Search Triggered: $query")
+            if (query.isBlank()) return
+
+            viewModelScope.launch {
+                val results =
+                    searchInDocumentUsecase(
+                        pdfId = pdfId,
+                        query = query,
+                        useExpandQuery = false, // true?
+                    )
+
+                if (results.isNotEmpty()) {
+                    _uiState.update {
+                        it.copy(
+                            searchResults = results,
+                            currentResultIndex = 0,
+                        )
+                    }
+                } else {
+                    println("검색 결과 없음")
+                    _uiState.update {
+                        it.copy(searchResults = emptyList(), currentResultIndex = -1)
+                    }
+                }
+            }
+        }
+
+        fun moveToNextResult() {
+            _uiState.update { state ->
+                if (state.searchResults.isNotEmpty()) {
+                    val nextIndex =
+                        (state.currentResultIndex + 1) % state.searchResults.size
+
+                    state.copy(currentResultIndex = nextIndex)
+                } else {
+                    state
+                }
+            }
+        }
+
+        fun moveToPrevResult() {
+            _uiState.update { state ->
+                if (state.searchResults.isNotEmpty()) {
+                    val prevIndex =
+                        if (state.currentResultIndex - 1 < 0) {
+                            state.searchResults.size - 1
+                        } else {
+                            state.currentResultIndex - 1
+                        }
+                    state.copy(currentResultIndex = prevIndex)
+                } else {
+                    state
+                }
+            }
+        }
+
+        fun clearSearch() {
+            _uiState.update {
+                it.copy(
+                    searchQuery = "",
+                    searchResults = emptyList(),
+                    currentResultIndex = -1,
+                    isSearchExpanded = false,
+                )
             }
         }
     }

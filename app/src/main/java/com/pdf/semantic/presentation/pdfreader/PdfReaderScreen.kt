@@ -10,6 +10,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -21,11 +22,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -63,6 +67,16 @@ fun PdfReaderScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
+    val listState = rememberLazyListState()
+
+    LaunchedEffect(uiState.currentResultIndex) {
+        if (uiState.currentResultIndex >= 0 && uiState.searchResults.isNotEmpty()) {
+            val targetSlide = uiState.searchResults[uiState.currentResultIndex]
+            val targetIndex = (targetSlide.slideNumber - 1).coerceAtLeast(0)
+            listState.animateScrollToItem(targetIndex)
+        }
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
             Row(
@@ -95,6 +109,7 @@ fun PdfReaderScreen(
                 }
             } else {
                 LazyColumn(
+                    state = listState,
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(bottom = 100.dp),
                 ) {
@@ -130,9 +145,14 @@ fun PdfReaderScreen(
             ExpandableSearchFab(
                 isExpanded = uiState.isSearchExpanded,
                 query = uiState.searchQuery,
+                resultCount = uiState.searchResults.size,
+                currentIndex = uiState.currentResultIndex,
                 onExpandChange = viewModel::toggleSearchExpanded,
                 onQueryChange = viewModel::updateSearchQuery,
                 onSearch = viewModel::onSearchTriggered,
+                onNextClick = viewModel::moveToNextResult,
+                onPrevClick = viewModel::moveToPrevResult,
+                onClearClick = viewModel::clearSearch,
             )
         }
     }
@@ -142,12 +162,19 @@ fun PdfReaderScreen(
 private fun ExpandableSearchFab(
     isExpanded: Boolean,
     query: String,
+    resultCount: Int,
+    currentIndex: Int,
     onExpandChange: () -> Unit,
     onQueryChange: (String) -> Unit,
     onSearch: () -> Unit,
+    onNextClick: () -> Unit,
+    onPrevClick: () -> Unit,
+    onClearClick: () -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
     val focusRequester = remember { FocusRequester() }
+
+    val isNavMode = resultCount > 0
 
     val fabWidth by animateDpAsState(
         targetValue = if (isExpanded) 340.dp else 56.dp,
@@ -166,7 +193,6 @@ private fun ExpandableSearchFab(
             focusManager.clearFocus()
         }
     }
-
     Surface(
         modifier =
             Modifier
@@ -184,7 +210,7 @@ private fun ExpandableSearchFab(
                 modifier =
                     Modifier
                         .size(56.dp)
-                        .clickable(enabled = !isExpanded) { onExpandChange() },
+                        .clickable(enabled = !isNavMode && !isExpanded) { onExpandChange() },
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
@@ -195,60 +221,105 @@ private fun ExpandableSearchFab(
             }
 
             AnimatedVisibility(
-                visible = isExpanded,
+                visible = isExpanded || isNavMode,
                 enter = fadeIn() + expandHorizontally(),
                 exit = fadeOut() + shrinkHorizontally(),
                 modifier = Modifier.weight(1f),
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    TextField(
-                        value = query,
-                        onValueChange = onQueryChange,
-                        modifier =
-                            Modifier
-                                .weight(1f)
-                                .focusRequester(focusRequester),
-                        placeholder = {
-                            Text(
-                                "검색어 입력",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color =
-                                    MaterialTheme.colorScheme.onPrimaryContainer.copy(
-                                        alpha = 0.7f,
-                                    ),
-                                maxLines = 1,
-                            )
-                        },
-                        singleLine = true,
-                        colors =
-                            TextFieldDefaults.colors(
-                                focusedContainerColor = Color.Transparent,
-                                unfocusedContainerColor = Color.Transparent,
-                                focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent,
-                                cursorColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                                focusedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                                unfocusedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                            ),
-                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                        keyboardActions =
-                            KeyboardActions(onSearch = {
-                                onSearch()
-                                focusManager.clearFocus()
-                            }),
-                    )
-
-                    IconButton(
-                        onClick = {
-                            onExpandChange()
-                            onQueryChange("")
-                        },
+                if (isNavMode) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.End,
+                        modifier = Modifier.fillMaxSize().padding(end = 8.dp),
                     ) {
-                        Icon(
-                            imageVector = Icons.Filled.Close,
-                            contentDescription = "Close",
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                        Text(
+                            text = "${currentIndex + 1} / $resultCount",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            modifier = Modifier.padding(horizontal = 12.dp),
                         )
+
+                        IconButton(onClick = onPrevClick) {
+                            Icon(
+                                imageVector = Icons.Filled.KeyboardArrowUp,
+                                contentDescription = "Previous Result",
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                            )
+                        }
+
+                        IconButton(onClick = onNextClick) {
+                            Icon(
+                                imageVector = Icons.Filled.KeyboardArrowDown,
+                                contentDescription = "Next Result",
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                            )
+                        }
+
+                        IconButton(onClick = onClearClick) {
+                            Icon(
+                                imageVector = Icons.Filled.Close,
+                                contentDescription = "Clear Search",
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                            )
+                        }
+                    }
+                } else {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        TextField(
+                            value = query,
+                            onValueChange = onQueryChange,
+                            modifier =
+                                Modifier
+                                    .weight(1f)
+                                    .focusRequester(focusRequester),
+                            placeholder = {
+                                Text(
+                                    "검색어 입력",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color =
+                                        MaterialTheme.colorScheme
+                                            .onPrimaryContainer
+                                            .copy(alpha = 0.7f),
+                                    maxLines = 1,
+                                )
+                            },
+                            singleLine = true,
+                            colors =
+                                TextFieldDefaults.colors(
+                                    focusedContainerColor = Color.Transparent,
+                                    unfocusedContainerColor = Color.Transparent,
+                                    focusedIndicatorColor = Color.Transparent,
+                                    unfocusedIndicatorColor = Color.Transparent,
+                                    cursorColor =
+                                        MaterialTheme
+                                            .colorScheme.onPrimaryContainer,
+                                    focusedTextColor =
+                                        MaterialTheme
+                                            .colorScheme.onPrimaryContainer,
+                                    unfocusedTextColor =
+                                        MaterialTheme
+                                            .colorScheme.onPrimaryContainer,
+                                ),
+                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                            keyboardActions =
+                                KeyboardActions(onSearch = {
+                                    onSearch()
+                                    focusManager.clearFocus()
+                                }),
+                        )
+
+                        IconButton(
+                            onClick = {
+                                onExpandChange()
+                                onQueryChange("")
+                            },
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Close,
+                                contentDescription = "Close",
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                            )
+                        }
                     }
                 }
             }

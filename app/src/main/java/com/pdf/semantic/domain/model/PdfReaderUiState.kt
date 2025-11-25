@@ -6,4 +6,6 @@ data class PdfReaderUiState(
     val totalPages: Int = 0,
     val isSearchExpanded: Boolean = false,
     val searchQuery: String = "",
+    val searchResults: List<SearchResult> = emptyList(),
+    val currentResultIndex: Int = -1,
 )

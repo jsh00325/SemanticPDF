@@ -68,4 +68,23 @@ class PdfReaderViewModel
                 e.printStackTrace()
                 null
             }
+
+        fun toggleSearchExpanded() {
+            android.util.Log.d("ViewModel", "toggleSearchExpanded 호출")
+            _uiState.update {
+                it.copy(isSearchExpanded = !it.isSearchExpanded)
+            }
+        }
+
+        fun updateSearchQuery(query: String) {
+            _uiState.update { it.copy(searchQuery = query) }
+        }
+
+        fun onSearchTriggered() {
+            val query = _uiState.value.searchQuery
+            if (query.isNotBlank()) {
+                // TODO: 여기서 Embedding 검색 UseCase 호출
+                println("Search Triggered: $query")
+            }
+        }
     }

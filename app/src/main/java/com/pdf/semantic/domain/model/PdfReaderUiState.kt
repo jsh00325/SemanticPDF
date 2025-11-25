@@ -4,4 +4,6 @@ data class PdfReaderUiState(
     val isLoading: Boolean = true,
     val title: String = "",
     val totalPages: Int = 0,
+    val isSearchExpanded: Boolean = false,
+    val searchQuery: String = "",
 )

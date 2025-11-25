@@ -18,6 +18,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
@@ -205,14 +206,62 @@ class PdfFileDataSource
             pdfId: Long,
             internalPath: String,
             totalPages: Int,
+            targetWidth: Int = 1080,
         ) {
             withContext(Dispatchers.IO) {
-                for (pageIndex in 1..totalPages) {
-                    getPageBitmap(
-                        pdfId = pdfId,
-                        internalPath = internalPath,
-                        pageNumber = pageIndex,
-                    )
+                val file = File(internalPath)
+                if (!file.exists()) return@withContext
+
+                try {
+                    ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY).use { fd ->
+                        PdfRenderer(fd).use { renderer ->
+
+                            val renderMatrix = android.graphics.Matrix()
+                            val renderRect = android.graphics.Rect()
+
+                            for (pageIndex in 1..totalPages) {
+                                ensureActive()
+
+                                val cacheKey = "${pdfId}_$pageIndex"
+
+                                if (bitmapCache.get(cacheKey) != null) continue
+
+                                renderer.openPage(pageIndex - 1).use { page ->
+                                    val scale =
+                                        if (page.width > targetWidth) {
+                                            targetWidth.toFloat() / page.width
+                                        } else {
+                                            1f
+                                        }
+
+                                    val destWidth = (page.width * scale).toInt()
+                                    val destHeight = (page.height * scale).toInt()
+
+                                    val bitmap =
+                                        createBitmap(destWidth, destHeight, Bitmap.Config.RGB_565)
+
+                                    renderMatrix.reset()
+                                    renderMatrix.postScale(scale, scale)
+
+                                    /* val canvas = android.graphics.Canvas(bitmap)
+                                    canvas.drawColor(Color.WHITE)
+                                    canvas.drawBitmap(bitmap, 0f, 0f, null)
+                                     */
+
+                                    page.render(
+                                        bitmap,
+                                        null,
+                                        renderMatrix,
+                                        PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY,
+                                    )
+
+                                    bitmapCache.put(cacheKey, bitmap)
+                                }
+                            }
+                        }
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
                 }
             }
         }

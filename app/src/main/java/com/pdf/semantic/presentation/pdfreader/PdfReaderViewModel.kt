@@ -102,21 +102,32 @@ class PdfReaderViewModel
             if (query.isBlank()) return
 
             viewModelScope.launch {
-                val results =
-                    searchInDocumentUsecase(
-                        pdfId = pdfId,
-                        query = query,
-                        useExpandQuery = isExpansionOn.value,
-                    )
+                _uiState.update { it.copy(isSearching = true) }
 
-                if (results.isNotEmpty()) {
-                    _uiState.update {
-                        it.copy(searchResults = results, currentResultIndex = 0)
+                try {
+                    val results =
+                        searchInDocumentUsecase(
+                            pdfId = pdfId,
+                            query = query,
+                            useExpandQuery = isExpansionOn.value,
+                        )
+
+                    if (results.isNotEmpty()) {
+                        _uiState.update {
+                            it.copy(searchResults = results, currentResultIndex = 0)
+                        }
+                    } else {
+                        _uiState.update {
+                            it.copy(
+                                searchResults = emptyList(),
+                                currentResultIndex = -1,
+                            )
+                        }
                     }
-                } else {
-                    _uiState.update {
-                        it.copy(searchResults = emptyList(), currentResultIndex = -1)
-                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                } finally {
+                    _uiState.update { it.copy(isSearching = false) }
                 }
             }
         }

@@ -162,6 +162,7 @@ fun PdfReaderScreen(
                     query = uiState.searchQuery,
                     resultCount = uiState.searchResults.size,
                     currentIndex = uiState.currentResultIndex,
+                    isSearching = uiState.isSearching,
                     isExpansionOn = isExpansionOn,
                     onExpandChange = viewModel::toggleSearchExpanded,
                     onQueryChange = viewModel::updateSearchQuery,

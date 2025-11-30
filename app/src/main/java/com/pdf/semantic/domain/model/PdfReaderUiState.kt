@@ -8,4 +8,5 @@ data class PdfReaderUiState(
     val searchQuery: String = "",
     val searchResults: List<SearchResult> = emptyList(),
     val currentResultIndex: Int = -1,
+    val isSearching: Boolean = false,
 )

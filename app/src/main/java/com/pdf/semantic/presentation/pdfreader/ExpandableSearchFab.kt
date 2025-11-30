@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -52,6 +53,7 @@ fun ExpandableSearchFab(
     query: String,
     resultCount: Int,
     currentIndex: Int,
+    isSearching: Boolean,
     isExpansionOn: Boolean,
     onExpandChange: () -> Unit,
     onQueryChange: (String) -> Unit,
@@ -96,14 +98,24 @@ fun ExpandableSearchFab(
                 modifier =
                     Modifier
                         .size(56.dp)
-                        .clickable(enabled = !isNavMode && !isExpanded) { onExpandChange() },
+                        .clickable(
+                            enabled = !isNavMode && !isExpanded && !isSearching,
+                        ) { onExpandChange() },
                 contentAlignment = Alignment.Center,
             ) {
-                Icon(
-                    imageVector = Icons.Filled.Search,
-                    contentDescription = "Search Icon",
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                )
+                if (isSearching) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        strokeWidth = 3.dp,
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Filled.Search,
+                        contentDescription = "Search Icon",
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                    )
+                }
             }
 
             AnimatedVisibility(

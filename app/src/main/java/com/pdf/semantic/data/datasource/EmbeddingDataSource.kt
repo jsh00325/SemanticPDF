@@ -18,43 +18,23 @@ class EmbeddingDataSource
         @ApplicationContext private val context: Context,
         @ModelDispatcher private val modelDispatcher: CoroutineDispatcher,
     ) {
-        private val modelCache = mutableMapOf<ModelType, CompiledModel>()
-
-        private suspend fun getModel(modelType: ModelType): CompiledModel =
-            withContext(modelDispatcher) {
-                modelCache.getOrPut(modelType) {
-                    CompiledModel
-                        .create(
-                            context.assets,
-                            modelType.modelName,
-                            CompiledModel.Options(Accelerator.CPU),
-                            null,
-                        ).also {
-                            Log.d(TAG, "${modelType.maxSeqLength} Model initialized.")
-                        }
-                }
-            }
-
-        private suspend fun getModelForTokens(tokenCount: Int): Pair<CompiledModel, Int> {
-            val modelType =
-                if (tokenCount > ModelType.SEQ_512.maxSeqLength) {
-                    ModelType.SEQ_2048
-                } else {
-                    ModelType.SEQ_512
-                }
-
-            return getModel(modelType) to modelType.maxSeqLength
+        private val model: CompiledModel by lazy {
+            Log.d(TAG, "Initializing EmbeddingModel...")
+            CompiledModel.create(
+                context.assets,
+                MODEL_NAME,
+                CompiledModel.Options(Accelerator.CPU),
+                null,
+            )
         }
 
-        suspend fun embed(tokens: LongArray): FloatArray {
-            val (model, inputDimension) = getModelForTokens(tokens.size)
-
-            return withContext(modelDispatcher) {
+        suspend fun embed(tokens: LongArray): FloatArray =
+            withContext(modelDispatcher) {
                 val inputBuffers = model.createInputBuffers()
                 val outputBuffers = model.createOutputBuffers()
 
                 val intTokens = tokens.map { it.toInt() }.toIntArray()
-                val paddedTokens = intTokens.copyOf(inputDimension)
+                val paddedTokens = intTokens.copyOf(MAX_SEQ_LENGTH)
 
                 inputBuffers[0].writeInt(paddedTokens)
 
@@ -62,23 +42,10 @@ class EmbeddingDataSource
 
                 outputBuffers[0].readFloat()
             }
-        }
-
-        private enum class ModelType(
-            val modelName: String,
-            val maxSeqLength: Int,
-        ) {
-            SEQ_512(
-                modelName = "embeddinggemma-300M_seq512_mixed-precision.tflite",
-                maxSeqLength = 512,
-            ),
-            SEQ_2048(
-                modelName = "embeddinggemma-300M_seq2048_mixed-precision.tflite",
-                maxSeqLength = 2048,
-            ),
-        }
 
         companion object {
             private const val TAG = "EmbeddingDataSource"
+            private const val MODEL_NAME = "embeddinggemma-300M_seq512_mixed-precision.tflite"
+            private const val MAX_SEQ_LENGTH = 512
         }
     }

@@ -21,6 +21,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 @Composable
 fun GlobalSearchScreen(
     onBackClick: () -> Unit,
+    onSearchResultClick: (Long, Int) -> Unit,
     viewModel: GlobalSearchViewModel = hiltViewModel(),
 ) {
     val searchQuery by viewModel.searchQuery.collectAsState()
@@ -82,7 +83,9 @@ fun GlobalSearchScreen(
                         items(searchResults) { result ->
                             GlobalSearchResultItem(
                                 modifier = Modifier.padding(horizontal = 16.dp),
-                                onItemClick = { /* TODO: 클릭 시 상세 페이지로 이동 */ },
+                                onItemClick = {
+                                    onSearchResultClick(result.pdfId, result.slideNumber)
+                                },
                                 uiItem = result,
                             )
                         }

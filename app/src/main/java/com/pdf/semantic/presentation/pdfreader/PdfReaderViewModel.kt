@@ -8,9 +8,14 @@ import com.pdf.semantic.domain.model.PdfReaderUiState
 import com.pdf.semantic.domain.usecase.pdfreader.GetPdfDetailUsecase
 import com.pdf.semantic.domain.usecase.pdfreader.LoadSpecificPdfUsecase
 import com.pdf.semantic.domain.usecase.pdfreader.SearchInDocumentUsecase
+import com.pdf.semantic.domain.usecase.setting.ObserveIsExpansionOnUsecase
+import com.pdf.semantic.domain.usecase.setting.SetIsExpansionOnUsecase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -23,10 +28,12 @@ class PdfReaderViewModel
         private val loadSpecificPdfUsecase: LoadSpecificPdfUsecase,
         private val getPdfDetailUsecase: GetPdfDetailUsecase,
         private val searchInDocumentUsecase: SearchInDocumentUsecase,
+        private val observeIsExpansionOnUsecase: ObserveIsExpansionOnUsecase,
+        private val setIsExpansionOnUsecase: SetIsExpansionOnUsecase,
     ) : ViewModel() {
         private val _uiState = MutableStateFlow(PdfReaderUiState())
         val uiState = _uiState.asStateFlow()
-
+        val initialPage: Int = savedStateHandle.get<Int>("page") ?: 1
         private var internalPath: String = ""
         private var pdfId: Long = 0L
 
@@ -82,6 +89,14 @@ class PdfReaderViewModel
             _uiState.update { it.copy(searchQuery = query) }
         }
 
+        val isExpansionOn: StateFlow<Boolean> =
+            observeIsExpansionOnUsecase()
+                .stateIn(
+                    scope = viewModelScope,
+                    started = SharingStarted.WhileSubscribed(5000),
+                    initialValue = false,
+                )
+
         fun onSearchTriggered() {
             val query = _uiState.value.searchQuery
             if (query.isBlank()) return
@@ -91,22 +106,24 @@ class PdfReaderViewModel
                     searchInDocumentUsecase(
                         pdfId = pdfId,
                         query = query,
-                        useExpandQuery = false, // true?
+                        useExpandQuery = isExpansionOn.value,
                     )
 
                 if (results.isNotEmpty()) {
                     _uiState.update {
-                        it.copy(
-                            searchResults = results,
-                            currentResultIndex = 0,
-                        )
+                        it.copy(searchResults = results, currentResultIndex = 0)
                     }
                 } else {
-                    println("검색 결과 없음")
                     _uiState.update {
                         it.copy(searchResults = emptyList(), currentResultIndex = -1)
                     }
                 }
+            }
+        }
+
+        fun toggleExpansion() {
+            viewModelScope.launch {
+                setIsExpansionOnUsecase(!isExpansionOn.value)
             }
         }
 

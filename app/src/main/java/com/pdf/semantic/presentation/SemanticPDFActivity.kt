@@ -68,6 +68,9 @@ fun SemanticPDFApp() {
                         onBackClick = {
                             navController.popBackStack()
                         },
+                        onSearchResultClick = { pdfId, pageNumber ->
+                            navController.navigateToPdfReader(pdfId, pageNumber)
+                        },
                     )
                 }
             }
@@ -86,6 +89,10 @@ fun NavHostController.navigateSingleTopTo(route: String) =
         restoreState = true
     }
 
-private fun NavHostController.navigateToPdfReader(pdfId: Long) {
-    this.navigateSingleTopTo("${PdfReader.route}/$pdfId")
+private fun NavHostController.navigateToPdfReader(
+    pdfId: Long,
+    pageNumber: Int = 1,
+) {
+    val route = "${PdfReader.route}/$pdfId?${PdfReader.PAGE_ARG}=$pageNumber"
+    this.navigate(route)
 }

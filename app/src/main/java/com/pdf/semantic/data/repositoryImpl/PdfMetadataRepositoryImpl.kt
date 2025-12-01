@@ -70,6 +70,18 @@ class PdfMetadataRepositoryImpl
             objectBoxDbDataSource.deletePdfDocument(pdfId)
         }
 
+        override suspend fun deleteFolders(folderIds: List<Long>) =
+            objectBoxDbDataSource.deleteFolders(folderIds)
+
+        override suspend fun deletePdfs(pdfIds: List<Long>) =
+            objectBoxDbDataSource.deletePdfDocuments(pdfIds)
+
+        override suspend fun moveFoldersAndPdfs(
+            folderIds: List<Long>,
+            pdfIds: List<Long>,
+            newParentId: Long?,
+        ) = objectBoxDbDataSource.moveFoldersAndPdfs(folderIds, pdfIds, newParentId)
+
         override fun observeAllPdfMetadata(parentId: Long?): Flow<List<PdfItem>> =
             objectBoxDbDataSource.observeAllPdfDocuments().map { entityList ->
                 entityList.toModels()
@@ -80,18 +92,18 @@ class PdfMetadataRepositoryImpl
                 entity.toModel()
             }
 
-    override fun observeFolders(parentId: Long?): Flow<List<FolderItem>> =
-        objectBoxDbDataSource.observeFoldersByParentId(parentId).map { it.toModels() }
+        override fun observeFolders(parentId: Long?): Flow<List<FolderItem>> =
+            objectBoxDbDataSource.observeFoldersByParentId(parentId).map { it.toModels() }
 
-    override fun observePdfs(parentId: Long?): Flow<List<PdfItem>> =
-        objectBoxDbDataSource.observePdfDocumentsByParentId(parentId).map { it.toModels() }
+        override fun observePdfs(parentId: Long?): Flow<List<PdfItem>> =
+            objectBoxDbDataSource.observePdfDocumentsByParentId(parentId).map { it.toModels() }
 
-    override fun observeFolderTrees(): Flow<FolderTreeNode> =
-        objectBoxDbDataSource.observeAllFolders().map { it.toFolderTreeNode() }
+        override fun observeFolderTrees(): Flow<FolderTreeNode> =
+            objectBoxDbDataSource.observeAllFolders().map { it.toFolderTreeNode() }
 
-    override fun observeFolderName(currentFolderId: Long?): Flow<String> =
-        objectBoxDbDataSource.observeFolderNameById(currentFolderId)
+        override fun observeFolderName(currentFolderId: Long?): Flow<String> =
+            objectBoxDbDataSource.observeFolderNameById(currentFolderId)
 
-    override fun observeFolderPath(currentFolderId: Long?): Flow<List<FolderItem>> =
-        objectBoxDbDataSource.observeFolderPathById(currentFolderId).map { it.toModels() }
+        override fun observeFolderPath(currentFolderId: Long?): Flow<List<FolderItem>> =
+            objectBoxDbDataSource.observeFolderPathById(currentFolderId).map { it.toModels() }
 }

@@ -12,7 +12,7 @@ interface PdfMetadataRepository {
 
     suspend fun getPdfMetadata(pdfId: Long): PdfItem?
 
-    suspend fun insertFolder(name: String, parentId: Long? = null)
+    suspend fun insertFolder(name: String, parentId: Long?)
 
     suspend fun insertPdfMetadata(
         fileName: String,
@@ -23,13 +23,19 @@ interface PdfMetadataRepository {
 
     suspend fun deletePdfMetadata(pdfId: Long)
 
+    suspend fun deleteFolders(folderIds: List<Long>)
+
+    suspend fun deletePdfs(pdfIds: List<Long>)
+
+    suspend fun moveFoldersAndPdfs(folderIds: List<Long>, pdfIds: List<Long>, newParentId: Long?)
+
     fun observeAllPdfMetadata(parentId: Long? = null): Flow<List<PdfItem>>
 
     fun observePdfMetadata(pdfId: Long): Flow<PdfItem>
 
-    fun observeFolders(parentId: Long? = null): Flow<List<FolderItem>>
+    fun observeFolders(parentId: Long?): Flow<List<FolderItem>>
 
-    fun observePdfs(parentId: Long? = null): Flow<List<PdfItem>>
+    fun observePdfs(parentId: Long?): Flow<List<PdfItem>>
 
     fun observeFolderTrees(): Flow<FolderTreeNode>
 

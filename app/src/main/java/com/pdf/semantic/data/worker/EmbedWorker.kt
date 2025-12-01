@@ -143,7 +143,7 @@ class EmbedWorker
             const val KEY_TITLE = "title"
             const val KEY_INTERNAL_PATH = "internal_path"
             const val KEY_TOTAL_PAGES = "total_pages"
-            private const val UPDATE_STATUS_STEP = 10
+            private const val UPDATE_STATUS_STEP = 1 // TODO: 디버깅 용으로 줄임 -> 이후 10으로 바꾸기
             private const val LOG_MSG_PDF_NOT_FOUND =
                 "PDF document with id %d not found. Assuming deleted. Work stopped."
         }

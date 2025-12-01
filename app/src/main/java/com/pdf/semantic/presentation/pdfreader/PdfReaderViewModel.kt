@@ -41,6 +41,9 @@ class PdfReaderViewModel
             pdfId = savedStateHandle.get<Long>("pdfId") ?: 0L
             if (pdfId > 0) {
                 loadInfoAndTriggerPreload()
+                if (initialPage > 1) {
+                    _uiState.update { it.copy(highlightedPage = initialPage) }
+                }
             } else {
                 _uiState.update { it.copy(isLoading = false, title = "잘못된 PDF ID") }
             }
@@ -114,7 +117,11 @@ class PdfReaderViewModel
 
                     if (results.isNotEmpty()) {
                         _uiState.update {
-                            it.copy(searchResults = results, currentResultIndex = 0)
+                            it.copy(
+                                searchResults = results,
+                                currentResultIndex = 0,
+                                highlightedPage = results[0].slideNumber,
+                            )
                         }
                     } else {
                         _uiState.update {
@@ -144,7 +151,10 @@ class PdfReaderViewModel
                     val nextIndex =
                         (state.currentResultIndex + 1) % state.searchResults.size
 
-                    state.copy(currentResultIndex = nextIndex)
+                    state.copy(
+                        currentResultIndex = nextIndex,
+                        highlightedPage = state.searchResults[nextIndex].slideNumber,
+                    )
                 } else {
                     state
                 }
@@ -160,7 +170,10 @@ class PdfReaderViewModel
                         } else {
                             state.currentResultIndex - 1
                         }
-                    state.copy(currentResultIndex = prevIndex)
+                    state.copy(
+                        currentResultIndex = prevIndex,
+                        highlightedPage = state.searchResults[prevIndex].slideNumber,
+                    )
                 } else {
                     state
                 }

@@ -133,9 +133,12 @@ fun PdfReaderScreen(
                             bitmap = viewModel.getPageBitmap(pageNumber)
                         }
 
+                        val isHighlighted = (uiState.highlightedPage == pageNumber)
+
                         SlideListItem(
                             bitmap = bitmap,
                             pageText = "$pageNumber / ${uiState.totalPages}",
+                            isHighlighted = isHighlighted,
                         )
                     }
                 }

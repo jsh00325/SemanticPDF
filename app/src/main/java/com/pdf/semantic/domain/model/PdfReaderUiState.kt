@@ -9,4 +9,5 @@ data class PdfReaderUiState(
     val searchResults: List<SearchResult> = emptyList(),
     val currentResultIndex: Int = -1,
     val isSearching: Boolean = false,
+    val highlightedPage: Int? = null,
 )

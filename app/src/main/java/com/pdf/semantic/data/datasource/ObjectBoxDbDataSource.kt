@@ -37,23 +37,20 @@ class ObjectBoxDbDataSource
         // Create
         suspend fun insertPdfDocument(pdfDocument: PdfDocumentEntity) =
             runInIoTx {
-                val parentAbsolutePath = pdfDocument.parentId?.let { parentId ->
-                    folderBox.get(parentId)?.let { parentFolder ->
-                        parentFolder.parentAbsolutePath + parentId + "/"
-                    } ?: "/"
-                } ?: "/"
-
-                pdfDocument.parentAbsolutePath = parentAbsolutePath
+                val parentFolder = pdfDocument.parentId?.let { folderBox.get(it) }
+                val parentPath = parentFolder?.let { "${it.parentAbsolutePath}${it.id}/" } ?: "/"
+                pdfDocument.parentAbsolutePath = parentPath
                 pdfDocumentBox.put(pdfDocument)
             }
 
         suspend fun insertFolder(folder: FolderEntity) =
             runInIoTx {
-                val parentAbsolutePath = folder.parentId?.let { parentId ->
-                    folderBox.get(parentId)?.let { parentFolder ->
-                        parentFolder.parentAbsolutePath + parentId + "/"
+                val parentAbsolutePath =
+                    folder.parentId?.let { parentId ->
+                        folderBox.get(parentId)?.let { parentFolder ->
+                            parentFolder.parentAbsolutePath + parentId + "/"
+                        } ?: "/"
                     } ?: "/"
-                } ?: "/"
 
                 folder.parentAbsolutePath = parentAbsolutePath
                 folderBox.put(folder)
@@ -87,9 +84,8 @@ class ObjectBoxDbDataSource
                         FolderEntity_.parentId.isNull()
                     } else {
                         FolderEntity_.parentId.equal(parentId)
-                    }
-                )
-                .build()
+                    },
+                ).build()
                 .asFlow(folderBox)
 
         fun observePdfDocumentsByParentId(parentId: Long?): Flow<List<PdfDocumentEntity>> =
@@ -99,9 +95,8 @@ class ObjectBoxDbDataSource
                         PdfDocumentEntity_.parentId.isNull()
                     } else {
                         PdfDocumentEntity_.parentId.equal(parentId)
-                    }
-                )
-                .build()
+                    },
+                ).build()
                 .asFlow(pdfDocumentBox)
 
         fun observeAllFolders(): Flow<List<FolderEntity>> =
@@ -140,11 +135,13 @@ class ObjectBoxDbDataSource
 
         suspend fun getPdfDocumentIdByInternalPath(internalPath: String): Long? =
             withContext(Dispatchers.IO) {
-                pdfDocumentBox.query(
-                    PdfDocumentEntity_.internalFilePath.equal(internalPath),
-                ).build().use { query ->
-                    query.findFirst()?.id
-                }
+                pdfDocumentBox
+                    .query(
+                        PdfDocumentEntity_.internalFilePath.equal(internalPath),
+                    ).build()
+                    .use { query ->
+                        query.findFirst()?.id
+                    }
             }
 
         suspend fun searchSimilarityPageEmbedding(
@@ -202,7 +199,11 @@ class ObjectBoxDbDataSource
                 }
             }
 
-        private fun movePdfDocument(id: Long, newParentId: Long?, newParentFullPath: String) {
+        private fun movePdfDocument(
+            id: Long,
+            newParentId: Long?,
+            newParentFullPath: String,
+        ) {
             pdfDocumentBox.get(id)?.also { pdfDocument ->
                 if (pdfDocument.parentId == newParentId) return
 
@@ -213,7 +214,11 @@ class ObjectBoxDbDataSource
             }
         }
 
-        private fun moveFolder(id: Long, newParentId: Long?, newParentFullPath: String) {
+        private fun moveFolder(
+            id: Long,
+            newParentId: Long?,
+            newParentFullPath: String,
+        ) {
             folderBox.get(id)?.also { folder ->
                 if (folder.parentId == newParentId) return
 
@@ -222,30 +227,36 @@ class ObjectBoxDbDataSource
                 val oldPathPrefix = folder.parentAbsolutePath + id + "/"
                 val newPathPrefix = newParentFullPath + id + "/"
 
-                val childrenFolder = folderBox
-                    .query(FolderEntity_.parentAbsolutePath.startsWith(oldPathPrefix))
-                    .build()
-                    .find()
+                val childrenFolder =
+                    folderBox
+                        .query(
+                            FolderEntity_.parentAbsolutePath.startsWith(oldPathPrefix),
+                        ).build()
+                        .find()
 
                 childrenFolder.forEach { child ->
-                    child.parentAbsolutePath = child.parentAbsolutePath.replaceFirst(
-                        oldPathPrefix,
-                        newPathPrefix
-                    )
+                    child.parentAbsolutePath =
+                        child.parentAbsolutePath.replaceFirst(
+                            oldPathPrefix,
+                            newPathPrefix,
+                        )
                 }
 
                 folderBox.put(childrenFolder)
 
-                val childrenPdfDocument = pdfDocumentBox
-                    .query(PdfDocumentEntity_.parentAbsolutePath.startsWith(oldPathPrefix))
-                    .build()
-                    .find()
+                val childrenPdfDocument =
+                    pdfDocumentBox
+                        .query(
+                            PdfDocumentEntity_.parentAbsolutePath.startsWith(oldPathPrefix),
+                        ).build()
+                        .find()
 
                 childrenPdfDocument.forEach { child ->
-                    child.parentAbsolutePath = child.parentAbsolutePath.replaceFirst(
-                        oldPathPrefix,
-                        newPathPrefix
-                    )
+                    child.parentAbsolutePath =
+                        child.parentAbsolutePath.replaceFirst(
+                            oldPathPrefix,
+                            newPathPrefix,
+                        )
                 }
 
                 pdfDocumentBox.put(childrenPdfDocument)
@@ -256,22 +267,26 @@ class ObjectBoxDbDataSource
             }
         }
 
-        suspend fun moveFoldersAndPdfs(folderIds: List<Long>, pdfDocumentIds: List<Long>, newParentId: Long?) =
-            runInIoTx {
-                val newParentFullPath = newParentId?.let { parentId ->
+        suspend fun moveFoldersAndPdfs(
+            folderIds: List<Long>,
+            pdfDocumentIds: List<Long>,
+            newParentId: Long?,
+        ) = runInIoTx {
+            val newParentFullPath =
+                newParentId?.let { parentId ->
                     folderBox.get(parentId)?.let { parentEntity ->
                         parentEntity.parentAbsolutePath + parentId + "/"
                     } ?: "/"
                 } ?: "/"
 
-                pdfDocumentIds.forEach { id ->
-                    movePdfDocument(id, newParentId, newParentFullPath)
-                }
-
-                folderIds.forEach { id ->
-                    moveFolder(id, newParentId, newParentFullPath)
-                }
+            pdfDocumentIds.forEach { id ->
+                movePdfDocument(id, newParentId, newParentFullPath)
             }
+
+            folderIds.forEach { id ->
+                moveFolder(id, newParentId, newParentFullPath)
+            }
+        }
 
         // Delete
         suspend fun deletePdfDocument(pdfId: Long) =
@@ -298,21 +313,32 @@ class ObjectBoxDbDataSource
                     folderBox.get(id)?.also { targetEntity ->
                         val targetFullPath = targetEntity.parentAbsolutePath + id + '/'
 
-                        val childrenFolder = folderBox
-                            .query(FolderEntity_.parentAbsolutePath.startsWith(targetFullPath))
-                            .build()
-                            .find()
+                        val childFolderQuery =
+                            FolderEntity_
+                                .parentAbsolutePath
+                                .startsWith(targetFullPath)
+
+                        val childrenFolder =
+                            folderBox
+                                .query(childFolderQuery)
+                                .build()
+                                .find()
                         folderBox.remove(childrenFolder)
 
-                        val childrenPdfDocument = pdfDocumentBox
-                            .query(PdfDocumentEntity_.parentAbsolutePath.startsWith(targetFullPath))
-                            .build()
-                            .find()
+                        val childPdfQuery =
+                            PdfDocumentEntity_
+                                .parentAbsolutePath
+                                .startsWith(targetFullPath)
+
+                        val childrenPdfDocument =
+                            pdfDocumentBox
+                                .query(childPdfQuery)
+                                .build()
+                                .find()
                         pdfDocumentBox.remove(childrenPdfDocument)
 
                         folderBox.remove(targetEntity)
                     }
                 }
             }
-
     }

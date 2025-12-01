@@ -5,11 +5,12 @@ import com.pdf.semantic.domain.model.FolderItem
 import com.pdf.semantic.domain.model.FolderTreeNode
 
 object FolderMapper {
-    fun FolderEntity.toModel(): FolderItem = FolderItem(
-        id = id,
-        name = name,
-        parentId = parentId,
-    )
+    fun FolderEntity.toModel(): FolderItem =
+        FolderItem(
+            id = id,
+            name = name,
+            parentId = parentId,
+        )
 
     fun List<FolderEntity>.toModels(): List<FolderItem> = map { it.toModel() }
 
@@ -22,7 +23,7 @@ object FolderMapper {
                 FolderTreeNode(
                     id = child.id,
                     name = child.name,
-                    children = buildTree(child.id)
+                    children = buildTree(child.id),
                 )
             }
         }
@@ -30,7 +31,7 @@ object FolderMapper {
         return FolderTreeNode(
             id = null,
             name = "폴더",
-            children = buildTree(null)
+            children = buildTree(null),
         )
     }
 }

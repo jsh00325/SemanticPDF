@@ -6,7 +6,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import javax.inject.Inject
 
-class ObserveFoldersAndPdfsUsecase @Inject
+class ObserveFoldersAndPdfsUsecase
+    @Inject
     constructor(
         private val pdfMetadataRepository: PdfMetadataRepository,
     ) {

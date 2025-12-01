@@ -36,35 +36,37 @@ class PdfMetadataRepositoryImpl
         override suspend fun getPdfMetadata(pdfId: Long): PdfItem? =
             objectBoxDbDataSource.getPdfDocumentById(pdfId)?.toModel()
 
-        override suspend fun insertFolder(name: String, parentId: Long?) =
-            objectBoxDbDataSource.insertFolder(
-                FolderEntity(
-                    parentId = parentId,
-                    name = name,
-                )
-            )
+        override suspend fun insertFolder(
+            name: String,
+            parentId: Long?,
+        ) = objectBoxDbDataSource.insertFolder(
+            FolderEntity(
+                parentId = parentId,
+                name = name,
+            ),
+        )
 
         override suspend fun insertPdfMetadata(
-                fileName: String,
-                internalPath: String,
-                totalPages: Int,
-                thumbnailPath: String,
-            ): Long {
-                // 1. 삽입
-                objectBoxDbDataSource.insertPdfDocument(
-                    PdfDocumentEntity(
-                        title = fileName,
-                        internalFilePath = internalPath,
-                        totalPages = totalPages,
-                        createdAt = Date(),
-                        thumbnail = thumbnailPath,
-                    ),
-                )
+            fileName: String,
+            internalPath: String,
+            totalPages: Int,
+            thumbnailPath: String,
+        ): Long {
+            // 1. 삽입
+            objectBoxDbDataSource.insertPdfDocument(
+                PdfDocumentEntity(
+                    title = fileName,
+                    internalFilePath = internalPath,
+                    totalPages = totalPages,
+                    createdAt = Date(),
+                    thumbnail = thumbnailPath,
+                ),
+            )
 
-                // 2. 내부 파일 경로로 ID 조회
-                return objectBoxDbDataSource.getPdfDocumentIdByInternalPath(internalPath)
-                    ?: throw IllegalStateException("PdfDocumentEntity not found")
-            }
+            // 2. 내부 파일 경로로 ID 조회
+            return objectBoxDbDataSource.getPdfDocumentIdByInternalPath(internalPath)
+                ?: throw IllegalStateException("PdfDocumentEntity not found")
+        }
 
         override suspend fun deletePdfMetadata(pdfId: Long) {
             objectBoxDbDataSource.deletePdfDocument(pdfId)
@@ -106,4 +108,4 @@ class PdfMetadataRepositoryImpl
 
         override fun observeFolderPath(currentFolderId: Long?): Flow<List<FolderItem>> =
             objectBoxDbDataSource.observeFolderPathById(currentFolderId).map { it.toModels() }
-}
+    }

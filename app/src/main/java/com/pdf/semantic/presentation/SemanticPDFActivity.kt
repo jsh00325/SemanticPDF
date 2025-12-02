@@ -146,7 +146,7 @@ private fun NavHostController.navigateToMoveItemsDialog(
 
 private fun NavHostController.navigateToPdfReader(
     pdfId: Long,
-    pageNumber: Int = 1,
+    pageNumber: Int = -1,
 ) {
     val route = "${PdfReader.route}/$pdfId?${PdfReader.PAGE_ARG}=$pageNumber"
     this.navigate(route)

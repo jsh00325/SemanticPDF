@@ -11,6 +11,7 @@ import com.pdf.semantic.domain.usecase.pdfreader.SearchInDocumentUsecase
 import com.pdf.semantic.domain.usecase.setting.ObserveIsExpansionOnUsecase
 import com.pdf.semantic.domain.usecase.setting.SetIsExpansionOnUsecase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -28,12 +29,12 @@ class PdfReaderViewModel
         private val loadSpecificPdfUsecase: LoadSpecificPdfUsecase,
         private val getPdfDetailUsecase: GetPdfDetailUsecase,
         private val searchInDocumentUsecase: SearchInDocumentUsecase,
-        private val observeIsExpansionOnUsecase: ObserveIsExpansionOnUsecase,
+        observeIsExpansionOnUsecase: ObserveIsExpansionOnUsecase,
         private val setIsExpansionOnUsecase: SetIsExpansionOnUsecase,
     ) : ViewModel() {
         private val _uiState = MutableStateFlow(PdfReaderUiState())
         val uiState = _uiState.asStateFlow()
-        val initialPage: Int = savedStateHandle.get<Int>("page") ?: 1
+        val initialPage: Int = savedStateHandle.get<Int>("page") ?: -1
         private var internalPath: String = ""
         private var pdfId: Long = 0L
 
@@ -41,11 +42,20 @@ class PdfReaderViewModel
             pdfId = savedStateHandle.get<Long>("pdfId") ?: 0L
             if (pdfId > 0) {
                 loadInfoAndTriggerPreload()
-                if (initialPage > 1) {
+                /*if (initialPage > 1) {
                     _uiState.update { it.copy(highlightedPage = initialPage) }
-                }
+                }*/
             } else {
                 _uiState.update { it.copy(isLoading = false, title = "잘못된 PDF ID") }
+            }
+        }
+
+        fun triggerHighlight(pageNumber: Int) {
+            _uiState.update { it.copy(highlightedPage = null) }
+
+            viewModelScope.launch {
+                delay(10)
+                _uiState.update { it.copy(highlightedPage = pageNumber) }
             }
         }
 
@@ -187,6 +197,7 @@ class PdfReaderViewModel
                     searchResults = emptyList(),
                     currentResultIndex = -1,
                     isSearchExpanded = false,
+                    highlightedPage = null,
                 )
             }
         }

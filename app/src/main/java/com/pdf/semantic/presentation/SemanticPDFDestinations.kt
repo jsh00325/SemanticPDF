@@ -61,7 +61,7 @@ object PdfReader : SemanticPDFDestination {
             navArgument(PDF_ID_ARG) { type = NavType.LongType },
             navArgument(PAGE_ARG) {
                 type = NavType.IntType
-                defaultValue = 1
+                defaultValue = -1
             },
         )
 }

@@ -1,6 +1,7 @@
 package com.pdf.semantic.presentation.globalsearch
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
@@ -23,6 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -48,13 +51,15 @@ fun GlobalSearchResultItem(
                 }
             }
         } else {
+            val imageShape = RoundedCornerShape(4.dp)
             Image(
                 bitmap = uiItem.slidePreviewImage.asImageBitmap(),
                 contentDescription = "PDF Slide Image",
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(4.dp)),
+                        .border(width = 1.dp, color = Color.LightGray, shape = imageShape)
+                        .clip(imageShape),
                 contentScale = ContentScale.Crop,
             )
         }
@@ -68,8 +73,11 @@ fun GlobalSearchResultItem(
         ) {
             Text(
                 text = uiItem.pdfTitle,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp,
+                modifier = Modifier.weight(1.0f).padding(end = 8.dp),
             )
 
             Text(

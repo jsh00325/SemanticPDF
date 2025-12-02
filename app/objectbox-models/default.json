@@ -39,7 +39,7 @@
     },
     {
       "id": "2:6317798375840237445",
-      "lastPropertyId": "9:6177685328335725823",
+      "lastPropertyId": "11:6269524350995471790",
       "name": "PdfDocumentEntity",
       "properties": [
         {
@@ -82,12 +82,56 @@
           "id": "9:6177685328335725823",
           "name": "title",
           "type": 9
+        },
+        {
+          "id": "10:26797763482220860",
+          "name": "parentId",
+          "type": 6
+        },
+        {
+          "id": "11:6269524350995471790",
+          "name": "parentAbsolutePath",
+          "type": 9
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "3:2417582382540666521",
+      "lastPropertyId": "5:8480752261599114432",
+      "name": "FolderEntity",
+      "properties": [
+        {
+          "id": "1:256622341013046405",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:7283432331579347691",
+          "name": "parentId",
+          "type": 6
+        },
+        {
+          "id": "3:5933139389651081030",
+          "name": "parentAbsolutePath",
+          "type": 9
+        },
+        {
+          "id": "4:3807666746087651386",
+          "name": "name",
+          "type": 9
+        },
+        {
+          "id": "5:8480752261599114432",
+          "name": "createdAt",
+          "type": 10
         }
       ],
       "relations": []
     }
   ],
-  "lastEntityId": "2:6317798375840237445",
+  "lastEntityId": "3:2417582382540666521",
   "lastIndexId": "2:5405132761509147327",
   "lastRelationId": "0:0",
   "lastSequenceId": "0:0",

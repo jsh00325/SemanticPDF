@@ -1,11 +1,11 @@
 package com.pdf.semantic.presentation.pdflist
 
 import androidx.compose.foundation.layout.Row
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.pdf.semantic.presentation.components.CircularCheckBox
 
 @Composable
 fun MultiSelectTopBar(
@@ -19,7 +19,7 @@ fun MultiSelectTopBar(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Checkbox(
+        CircularCheckBox(
             checked = isAllSelected,
             onCheckedChange = { isChecked ->
                 if (isChecked) {

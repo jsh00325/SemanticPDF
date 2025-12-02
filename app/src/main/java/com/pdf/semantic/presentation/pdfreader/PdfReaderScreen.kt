@@ -39,6 +39,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.pdf.semantic.R
 import com.pdf.semantic.presentation.components.SlideListItem
+import kotlinx.coroutines.delay
 
 @Composable
 fun PdfReaderScreen(
@@ -55,13 +56,16 @@ fun PdfReaderScreen(
             val targetSlide = uiState.searchResults[uiState.currentResultIndex]
             val targetIndex = (targetSlide.slideNumber - 1).coerceAtLeast(0)
             listState.animateScrollToItem(targetIndex)
+            viewModel.triggerHighlight(targetSlide.slideNumber)
         }
     }
 
     LaunchedEffect(uiState.isLoading) {
-        if (!uiState.isLoading && viewModel.initialPage > 1) {
+        if (!uiState.isLoading && viewModel.initialPage > 0) {
             val targetIndex = (viewModel.initialPage - 1).coerceAtLeast(0)
-            listState.scrollToItem(targetIndex)
+            delay(100)
+            listState.animateScrollToItem(targetIndex)
+            viewModel.triggerHighlight(viewModel.initialPage)
         }
     }
 

@@ -1,5 +1,7 @@
 package com.pdf.semantic.domain.repository
 
+import com.pdf.semantic.domain.model.FolderItem
+import com.pdf.semantic.domain.model.FolderTreeNode
 import com.pdf.semantic.domain.model.PdfItem
 import kotlinx.coroutines.flow.Flow
 
@@ -10,16 +12,36 @@ interface PdfMetadataRepository {
 
     suspend fun getPdfMetadata(pdfId: Long): PdfItem?
 
+    suspend fun insertFolder(
+        name: String,
+        parentId: Long?,
+    )
+
     suspend fun insertPdfMetadata(
         fileName: String,
         internalPath: String,
         totalPages: Int,
         thumbnailPath: String,
+        parentId: Long?,
     ): Long
 
-    suspend fun deletePdfMetadata(pdfId: Long)
+    suspend fun deleteFolders(folderIds: List<Long>)
 
-    fun observeAllPdfMetadata(): Flow<List<PdfItem>>
+    suspend fun deletePdfs(pdfIds: List<Long>)
 
-    fun observePdfMetadata(pdfId: Long): Flow<PdfItem>
+    suspend fun moveFoldersAndPdfs(
+        folderIds: List<Long>,
+        pdfIds: List<Long>,
+        newParentId: Long?,
+    )
+
+    fun observeFolders(parentId: Long?): Flow<List<FolderItem>>
+
+    fun observePdfs(parentId: Long?): Flow<List<PdfItem>>
+
+    fun observeFolderTrees(): Flow<FolderTreeNode>
+
+    fun observeFolderName(currentFolderId: Long?): Flow<String>
+
+    fun observeFolderPath(currentFolderId: Long?): Flow<List<FolderItem>>
 }

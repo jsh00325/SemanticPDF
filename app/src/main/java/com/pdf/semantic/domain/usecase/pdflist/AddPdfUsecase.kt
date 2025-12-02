@@ -12,7 +12,10 @@ class AddPdfUsecase
         private val pdfMetadataRepository: PdfMetadataRepository,
         private val embeddingRepository: EmbeddingRepository,
     ) {
-        suspend operator fun invoke(uriString: String): Result<Long> =
+        suspend operator fun invoke(
+            uriString: String,
+            parentId: Long?,
+        ): Result<Long> =
             try {
                 val info = pdfFileRepository.getPdfDetail(uriString)
 
@@ -24,6 +27,7 @@ class AddPdfUsecase
                         internalPath = internalPath,
                         totalPages = info.totalPages,
                         thumbnailPath = info.thumbnailFilePath,
+                        parentId = parentId,
                     )
 
                 embeddingRepository.scheduleEmbedding(

@@ -14,6 +14,8 @@ data class PdfDocumentEntity(
     @Id
     var id: Long = 0,
     var title: String = "",
+    var parentId: Long? = null,
+    var parentAbsolutePath: String = "/",
     var internalFilePath: String = "",
     var totalPages: Int = 0,
     var processedPages: Int = 0,

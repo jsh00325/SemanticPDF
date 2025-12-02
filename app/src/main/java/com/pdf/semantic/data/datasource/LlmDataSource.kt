@@ -16,7 +16,7 @@ class LlmDataSource
         private val model =
             Firebase
                 .ai(backend = GenerativeBackend.googleAI())
-                .generativeModel("gemini-2.5-flash")
+                .generativeModel("gemini-2.5-flash-lite")
 
         suspend fun expandQueryForRetrieval(query: String): String =
             withContext(Dispatchers.IO) {

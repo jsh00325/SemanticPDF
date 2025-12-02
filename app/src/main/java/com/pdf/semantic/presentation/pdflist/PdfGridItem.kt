@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -34,6 +33,7 @@ import com.pdf.semantic.R
 import com.pdf.semantic.domain.model.EmbeddingStatus
 import com.pdf.semantic.domain.model.PdfItem
 import com.pdf.semantic.presentation.components.CircularCheckBox
+import com.pdf.semantic.presentation.components.CustomLinearProgressIndicator
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -92,15 +92,14 @@ fun PdfGridItem(
             }
 
             if (item.status != EmbeddingStatus.COMPLETE) {
-                LinearProgressIndicator(
-                    progress = {
-                        item.progressedPages.toFloat() / item.totalPages.toFloat()
-                    },
+                CustomLinearProgressIndicator(
                     modifier =
                         Modifier
                             .align(Alignment.BottomCenter)
                             .fillMaxWidth()
                             .height(4.dp),
+                    current = item.progressedPages,
+                    total = item.totalPages,
                 )
             }
         }

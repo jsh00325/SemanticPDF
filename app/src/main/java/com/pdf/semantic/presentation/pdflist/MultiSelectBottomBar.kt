@@ -12,6 +12,7 @@ import com.pdf.semantic.presentation.components.IconButtonWithLabel
 @Composable
 fun MultiSelectBottomBar(
     modifier: Modifier = Modifier,
+    onMoveClick: () -> Unit = {},
     onDeleteClick: () -> Unit = {},
 ) {
     Row(
@@ -19,6 +20,13 @@ fun MultiSelectBottomBar(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceAround,
     ) {
+        IconButtonWithLabel(
+            onClick = onMoveClick,
+            iconPainter = painterResource(id = R.drawable.move_dir_24),
+            contentDescription = "Move Items",
+            labelText = "이동",
+        )
+
         IconButtonWithLabel(
             onClick = onDeleteClick,
             iconPainter = painterResource(id = R.drawable.trash_24),

@@ -51,11 +51,13 @@ class PdfMetadataRepositoryImpl
             internalPath: String,
             totalPages: Int,
             thumbnailPath: String,
+            parentId: Long?,
         ): Long {
             // 1. 삽입
             objectBoxDbDataSource.insertPdfDocument(
                 PdfDocumentEntity(
                     title = fileName,
+                    parentId = parentId,
                     internalFilePath = internalPath,
                     totalPages = totalPages,
                     createdAt = Date(),

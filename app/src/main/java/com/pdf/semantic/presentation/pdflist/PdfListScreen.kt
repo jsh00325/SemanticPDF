@@ -56,9 +56,11 @@ fun PdfListScreen(
     val uiState by viewModel.uiState.collectAsState()
     val filePickerLauncher =
         rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.GetContent(),
-        ) { uri: Uri? ->
-            uri?.let { viewModel.onNewPdfClick(it) }
+            contract = ActivityResultContracts.GetMultipleContents(),
+        ) { uri: List<Uri>? ->
+            uri?.forEach { uri ->
+                viewModel.onNewPdfClick(uri)
+            }
         }
 
     var showNewFolderDialog by remember { mutableStateOf(false) }
@@ -83,7 +85,7 @@ fun PdfListScreen(
             var bodyText = ""
             if (selectedFolderSize > 0) bodyText = "폴더 ${selectedFolderSize}개와 폴더 내 모든 항목"
             if (selectedPdfSize > 0) {
-                if (bodyText.isNotEmpty()) bodyText += "과 "
+                if (bodyText.isNotEmpty()) bodyText += ", "
                 bodyText += "PDF ${selectedPdfSize}개를"
             } else {
                 bodyText += "을"

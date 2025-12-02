@@ -68,7 +68,7 @@ fun BaseBottomDialog(
                     modifier =
                         Modifier
                             .heightIn(max = screenHeight * 0.9f)
-                            .padding(24.dp),
+                            .padding(top = 24.dp, start = 24.dp, end = 24.dp, bottom = 8.dp),
                     content = content,
                 )
             }

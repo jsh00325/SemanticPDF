@@ -156,14 +156,6 @@ class PdfFileDataSource
                 destinationFile.absolutePath
             }
 
-        suspend fun deletePdfFile(internalPath: String) =
-            withContext(Dispatchers.IO) {
-                val file = File(internalPath)
-                if (file.exists()) {
-                    file.delete()
-                }
-            }
-
         suspend fun renderPage(
             internalPath: String,
             pageNumber: Int,
@@ -217,7 +209,6 @@ class PdfFileDataSource
                         PdfRenderer(fd).use { renderer ->
 
                             val renderMatrix = android.graphics.Matrix()
-                            val renderRect = android.graphics.Rect()
 
                             for (pageIndex in 1..totalPages) {
                                 ensureActive()
@@ -242,11 +233,6 @@ class PdfFileDataSource
 
                                     renderMatrix.reset()
                                     renderMatrix.postScale(scale, scale)
-
-                                    /* val canvas = android.graphics.Canvas(bitmap)
-                                    canvas.drawColor(Color.WHITE)
-                                    canvas.drawBitmap(bitmap, 0f, 0f, null)
-                                     */
 
                                     page.render(
                                         bitmap,

@@ -25,8 +25,6 @@ interface PdfMetadataRepository {
         parentId: Long?,
     ): Long
 
-    suspend fun deletePdfMetadata(pdfId: Long)
-
     suspend fun deleteFolders(folderIds: List<Long>)
 
     suspend fun deletePdfs(pdfIds: List<Long>)
@@ -36,10 +34,6 @@ interface PdfMetadataRepository {
         pdfIds: List<Long>,
         newParentId: Long?,
     )
-
-    fun observeAllPdfMetadata(parentId: Long? = null): Flow<List<PdfItem>>
-
-    fun observePdfMetadata(pdfId: Long): Flow<PdfItem>
 
     fun observeFolders(parentId: Long?): Flow<List<FolderItem>>
 

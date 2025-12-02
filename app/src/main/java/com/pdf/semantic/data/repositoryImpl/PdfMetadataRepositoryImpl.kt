@@ -70,10 +70,6 @@ class PdfMetadataRepositoryImpl
                 ?: throw IllegalStateException("PdfDocumentEntity not found")
         }
 
-        override suspend fun deletePdfMetadata(pdfId: Long) {
-            objectBoxDbDataSource.deletePdfDocument(pdfId)
-        }
-
         override suspend fun deleteFolders(folderIds: List<Long>) =
             objectBoxDbDataSource.deleteFolders(folderIds)
 
@@ -85,16 +81,6 @@ class PdfMetadataRepositoryImpl
             pdfIds: List<Long>,
             newParentId: Long?,
         ) = objectBoxDbDataSource.moveFoldersAndPdfs(folderIds, pdfIds, newParentId)
-
-        override fun observeAllPdfMetadata(parentId: Long?): Flow<List<PdfItem>> =
-            objectBoxDbDataSource.observeAllPdfDocuments().map { entityList ->
-                entityList.toModels()
-            }
-
-        override fun observePdfMetadata(pdfId: Long): Flow<PdfItem> =
-            objectBoxDbDataSource.observePdfDocumentById(pdfId).map { entity ->
-                entity.toModel()
-            }
 
         override fun observeFolders(parentId: Long?): Flow<List<FolderItem>> =
             objectBoxDbDataSource.observeFoldersByParentId(parentId).map { it.toModels() }

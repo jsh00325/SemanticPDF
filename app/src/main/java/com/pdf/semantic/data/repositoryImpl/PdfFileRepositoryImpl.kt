@@ -17,15 +17,6 @@ class PdfFileRepositoryImpl
         override suspend fun savePdfFile(uriString: String): String =
             dataSource.savePdfFile(uriString)
 
-        override suspend fun deletePdfFile(internalPath: String) {
-            dataSource.deletePdfFile(internalPath)
-        }
-
-        override suspend fun renderPage(
-            internalPath: String,
-            pageNumber: Int,
-        ): Bitmap = dataSource.renderPage(internalPath, pageNumber)
-
         override suspend fun preloadAllPages(
             pdfId: Long,
             internalPath: String,

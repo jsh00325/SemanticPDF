@@ -8,13 +8,6 @@ interface PdfFileRepository {
 
     suspend fun savePdfFile(uriString: String): String
 
-    suspend fun deletePdfFile(internalPath: String)
-
-    suspend fun renderPage(
-        internalPath: String,
-        pageNumber: Int,
-    ): Bitmap
-
     suspend fun preloadAllPages(
         pdfId: Long,
         internalPath: String,

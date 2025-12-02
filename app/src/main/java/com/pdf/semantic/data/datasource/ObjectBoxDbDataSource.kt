@@ -11,10 +11,10 @@ import com.pdf.semantic.domain.model.EmbeddingStatus
 import io.objectbox.BoxStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.collections.emptyList
@@ -167,12 +167,6 @@ class ObjectBoxDbDataSource
                     }
             }
 
-        fun observePdfDocumentById(pdfId: Long): Flow<PdfDocumentEntity> =
-            pdfDocumentBox.observeById(pdfId).filterNotNull()
-
-        fun observeAllPdfDocuments(): Flow<List<PdfDocumentEntity>> =
-            pdfDocumentBox.query().build().asFlow(pdfDocumentBox)
-
         // Update
         suspend fun updatePdfStatus(
             pdfId: Long,
@@ -289,56 +283,64 @@ class ObjectBoxDbDataSource
         }
 
         // Delete
-        suspend fun deletePdfDocument(pdfId: Long) =
-            runInIoTx {
-                pdfDocumentBox.get(pdfId)?.also {
-                    pageEmbeddingBox.remove(it.pageEmbeddings)
-                    pdfDocumentBox.remove(it)
-                }
+        private fun deletePdfFile(internalPath: String) {
+            val file = File(internalPath)
+            if (file.exists()) file.delete()
+        }
+
+        private fun deletePdfDocument(pdfId: Long) {
+            pdfDocumentBox.get(pdfId)?.also {
+                deletePdfFile(it.internalFilePath)
+                pageEmbeddingBox.remove(it.pageEmbeddings)
+                pdfDocumentBox.remove(it)
             }
+        }
 
         suspend fun deletePdfDocuments(pdfIds: List<Long>) =
             runInIoTx {
-                pdfIds.forEach { id ->
-                    pdfDocumentBox.get(id)?.also { targetEntity ->
-                        pageEmbeddingBox.remove(targetEntity.pageEmbeddings)
-                        pdfDocumentBox.remove(targetEntity)
-                    }
+                pdfIds.forEach {
+                    deletePdfDocument(it)
                 }
             }
 
         suspend fun deleteFolders(folderIds: List<Long>) =
             runInIoTx {
+                val childPdfIds = mutableListOf<Long>()
+
                 folderIds.forEach { id ->
                     folderBox.get(id)?.also { targetEntity ->
                         val targetFullPath = targetEntity.parentAbsolutePath + id + '/'
 
-                        val childFolderQuery =
-                            FolderEntity_
-                                .parentAbsolutePath
-                                .startsWith(targetFullPath)
-
-                        val childrenFolder =
-                            folderBox
-                                .query(childFolderQuery)
-                                .build()
-                                .find()
-                        folderBox.remove(childrenFolder)
-
-                        val childPdfQuery =
-                            PdfDocumentEntity_
-                                .parentAbsolutePath
-                                .startsWith(targetFullPath)
-
-                        val childrenPdfDocument =
+                        // 각 폴더의 자식 PDF ID 수집
+                        childPdfIds.addAll(
                             pdfDocumentBox
-                                .query(childPdfQuery)
-                                .build()
+                                .query(
+                                    PdfDocumentEntity_
+                                        .parentAbsolutePath
+                                        .startsWith(targetFullPath),
+                                ).build()
                                 .find()
-                        pdfDocumentBox.remove(childrenPdfDocument)
+                                .map { it.id },
+                        )
+
+                        // 각 폴더의 자식 폴더들 일괄 삭제
+                        folderBox.remove(
+                            folderBox
+                                .query(
+                                    FolderEntity_
+                                        .parentAbsolutePath
+                                        .startsWith(targetFullPath),
+                                ).build()
+                                .find(),
+                        )
 
                         folderBox.remove(targetEntity)
                     }
+                }
+
+                // 각 폴더의 자식 PDF 일괄 삭제
+                childPdfIds.forEach {
+                    deletePdfDocument(it)
                 }
             }
     }

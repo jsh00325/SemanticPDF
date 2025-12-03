@@ -2,7 +2,9 @@ package com.pdf.semantic.data.datasource
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.Matrix
 import android.graphics.pdf.PdfRenderer
 import android.net.Uri
 import android.os.ParcelFileDescriptor
@@ -115,7 +117,7 @@ class PdfFileDataSource
                             Bitmap.Config.ARGB_8888,
                         )
 
-                    val canvas = android.graphics.Canvas(thumbnailBitmap)
+                    val canvas = Canvas(thumbnailBitmap)
                     canvas.drawColor(Color.WHITE)
                     canvas.drawBitmap(thumbnailBitmap, 0f, 0f, null)
 
@@ -176,7 +178,7 @@ class PdfFileDataSource
 
                     val bitmap = createBitmap(page.width, page.height)
 
-                    val canvas = _root_ide_package_.coil3.Canvas(bitmap)
+                    val canvas = Canvas(bitmap)
                     canvas.drawColor(Color.WHITE)
                     canvas.drawBitmap(bitmap, 0f, 0f, null)
 
@@ -208,7 +210,7 @@ class PdfFileDataSource
                     ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY).use { fd ->
                         PdfRenderer(fd).use { renderer ->
 
-                            val renderMatrix = android.graphics.Matrix()
+                            val renderMatrix = Matrix()
 
                             for (pageIndex in 1..totalPages) {
                                 ensureActive()

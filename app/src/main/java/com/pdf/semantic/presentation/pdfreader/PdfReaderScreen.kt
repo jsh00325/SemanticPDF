@@ -88,8 +88,8 @@ fun PdfReaderScreen(
                 }
                 Text(
                     text = uiState.title,
-                    modifier = Modifier.padding(start = 16.dp),
-                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(start = 8.dp),
+                    style = MaterialTheme.typography.titleLarge,
                 )
             }
         },

@@ -33,10 +33,7 @@ fun GlobalSearchScreen(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             GlobalSearchTopSearchBar(
-                modifier =
-                    Modifier
-                        .padding(8.dp)
-                        .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
                 onBackClick = onBackClick,
                 query = searchQuery,
                 onQueryChange = viewModel::onSearchQueryChanged,

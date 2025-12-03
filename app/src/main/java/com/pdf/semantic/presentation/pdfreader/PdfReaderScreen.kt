@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
@@ -36,9 +35,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.pdf.semantic.R
 import com.pdf.semantic.presentation.components.SlideListItem
+import com.pdf.semantic.presentation.components.ZoomableLayout
 import kotlinx.coroutines.delay
 
 @Composable
@@ -88,8 +87,8 @@ fun PdfReaderScreen(
                 }
                 Text(
                     text = uiState.title,
-                    modifier = Modifier.padding(start = 16.dp),
-                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(start = 8.dp),
+                    style = MaterialTheme.typography.titleLarge,
                 )
             }
         },
@@ -112,38 +111,43 @@ fun PdfReaderScreen(
             } else {
                 val imeBottomPadding = WindowInsets.ime.asPaddingValues().calculateBottomPadding()
 
-                LazyColumn(
-                    state = listState,
+                ZoomableLayout(
                     modifier =
                         Modifier
                             .fillMaxSize()
                             .background(Color(0xFFF5F5F5)),
-                    contentPadding =
-                        PaddingValues(
-                            start = 0.dp,
-                            end = 0.dp,
-                            top = 0.dp,
-                            bottom = 0.dp + imeBottomPadding,
-                        ),
+                    resetKey = uiState.currentResultIndex,
                 ) {
-                    items(
-                        count = uiState.totalPages,
-                        key = { index -> index },
-                    ) { index ->
-                        var bitmap by remember { mutableStateOf<Bitmap?>(null) }
-                        val pageNumber = index + 1
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding =
+                            PaddingValues(
+                                start = 0.dp,
+                                end = 0.dp,
+                                top = 0.dp,
+                                bottom = 0.dp + imeBottomPadding,
+                            ),
+                    ) {
+                        items(
+                            count = uiState.totalPages,
+                            key = { index -> index },
+                        ) { index ->
+                            var bitmap by remember { mutableStateOf<Bitmap?>(null) }
+                            val pageNumber = index + 1
 
-                        LaunchedEffect(key1 = pageNumber) {
-                            bitmap = viewModel.getPageBitmap(pageNumber)
+                            LaunchedEffect(key1 = pageNumber) {
+                                bitmap = viewModel.getPageBitmap(pageNumber)
+                            }
+
+                            val isHighlighted = (uiState.highlightedPage == pageNumber)
+
+                            SlideListItem(
+                                bitmap = bitmap,
+                                pageText = "$pageNumber / ${uiState.totalPages}",
+                                isHighlighted = isHighlighted,
+                            )
                         }
-
-                        val isHighlighted = (uiState.highlightedPage == pageNumber)
-
-                        SlideListItem(
-                            bitmap = bitmap,
-                            pageText = "$pageNumber / ${uiState.totalPages}",
-                            isHighlighted = isHighlighted,
-                        )
                     }
                 }
             }

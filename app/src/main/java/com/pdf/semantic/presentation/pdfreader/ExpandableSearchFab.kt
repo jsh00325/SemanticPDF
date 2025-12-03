@@ -1,5 +1,6 @@
 package com.pdf.semantic.presentation.pdfreader
 
+import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
@@ -9,7 +10,9 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -17,6 +20,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -30,7 +34,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -43,6 +46,8 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.pdf.semantic.presentation.components.AIExpansionToggleButton
 
@@ -126,7 +131,10 @@ fun ExpandableSearchFab(
                 if (isNavMode) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxSize().padding(end = 8.dp),
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .padding(end = 8.dp),
                     ) {
                         Box(
                             modifier =
@@ -168,37 +176,15 @@ fun ExpandableSearchFab(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.padding(end = 4.dp),
                     ) {
-                        TextField(
-                            value = query,
-                            onValueChange = onQueryChange,
+                        BasicTextField(
                             modifier =
                                 Modifier
                                     .weight(1f)
                                     .focusRequester(focusRequester),
-                            placeholder = {
-                                Text(
-                                    "검색어 입력",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    maxLines = 1,
-                                )
-                            },
+                            value = query,
+                            onValueChange = onQueryChange,
                             singleLine = true,
-                            colors =
-                                TextFieldDefaults.colors(
-                                    focusedContainerColor = Color.Transparent,
-                                    unfocusedContainerColor = Color.Transparent,
-                                    focusedIndicatorColor = Color.Transparent,
-                                    unfocusedIndicatorColor = Color.Transparent,
-                                    cursorColor =
-                                        MaterialTheme
-                                            .colorScheme.onPrimaryContainer,
-                                    focusedTextColor =
-                                        MaterialTheme
-                                            .colorScheme.onPrimaryContainer,
-                                    unfocusedTextColor =
-                                        MaterialTheme
-                                            .colorScheme.onPrimaryContainer,
-                                ),
+                            maxLines = 1,
                             keyboardOptions =
                                 KeyboardOptions(
                                     imeAction =
@@ -209,7 +195,83 @@ fun ExpandableSearchFab(
                                     onSearch()
                                     focusManager.clearFocus()
                                 }),
+                            decorationBox = { innerTextField ->
+                                TextFieldDefaults.DecorationBox(
+                                    value = query,
+                                    innerTextField = innerTextField,
+                                    enabled = true,
+                                    singleLine = true,
+                                    visualTransformation = VisualTransformation.None,
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    placeholder = {
+                                        Text(
+                                            "검색어 입력",
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            maxLines = 1,
+                                        )
+                                    },
+                                    contentPadding = PaddingValues(0.dp),
+                                    colors =
+                                        TextFieldDefaults.colors(
+                                            focusedContainerColor = Color.Transparent,
+                                            unfocusedContainerColor = Color.Transparent,
+                                            focusedIndicatorColor = Color.Transparent,
+                                            unfocusedIndicatorColor = Color.Transparent,
+                                            cursorColor =
+                                                MaterialTheme
+                                                    .colorScheme.onPrimaryContainer,
+                                            focusedTextColor =
+                                                MaterialTheme
+                                                    .colorScheme.onPrimaryContainer,
+                                            unfocusedTextColor =
+                                                MaterialTheme
+                                                    .colorScheme.onPrimaryContainer,
+                                        ),
+                                )
+                            },
                         )
+//                        TextField(
+//                            value = query,
+//                            onValueChange = onQueryChange,
+//                            modifier =
+//                                Modifier
+//                                    .weight(1f)
+//                                    .focusRequester(focusRequester),
+//                            placeholder = {
+//                                Text(
+//                                    "검색어 입력",
+//                                    style = MaterialTheme.typography.bodyMedium,
+//                                    maxLines = 1,
+//                                )
+//                            },
+//                            singleLine = true,
+//                            colors =
+//                                TextFieldDefaults.colors(
+//                                    focusedContainerColor = Color.Transparent,
+//                                    unfocusedContainerColor = Color.Transparent,
+//                                    focusedIndicatorColor = Color.Transparent,
+//                                    unfocusedIndicatorColor = Color.Transparent,
+//                                    cursorColor =
+//                                        MaterialTheme
+//                                            .colorScheme.onPrimaryContainer,
+//                                    focusedTextColor =
+//                                        MaterialTheme
+//                                            .colorScheme.onPrimaryContainer,
+//                                    unfocusedTextColor =
+//                                        MaterialTheme
+//                                            .colorScheme.onPrimaryContainer,
+//                                ),
+//                            keyboardOptions =
+//                                KeyboardOptions(
+//                                    imeAction =
+//                                        ImeAction.Search,
+//                                ),
+//                            keyboardActions =
+//                                KeyboardActions(onSearch = {
+//                                    onSearch()
+//                                    focusManager.clearFocus()
+//                                }),
+//                        )
                         AIExpansionToggleButton(
                             isEnabled = isExpansionOn,
                             onClick = onExpansionToggle,
@@ -232,4 +294,17 @@ fun ExpandableSearchFab(
             }
         }
     }
+}
+
+@Preview(
+    name = "Light Mode",
+    showBackground = true,
+)
+@Preview(
+    name = "Dark Mode",
+    showBackground = true,
+    uiMode = UI_MODE_NIGHT_YES,
+)
+@Composable
+fun ExpandableSearchFabPreview() {
 }
